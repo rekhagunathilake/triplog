@@ -1,0 +1,28 @@
+<Solution>
+  <Folder Name="/Contracts/">
+    <Project Path="Triplog.Contracts/Triplog.Contracts.csproj" />
+  </Folder>
+  <Folder Name="/docs/" />
+  <Folder Name="/Entries/">
+    <Project Path="Triplog.Entries.Api/Triplog.Entries.Api.csproj" />
+    <Project Path="Triplog.Entries.Application/Triplog.Entries.Application.csproj" />
+    <Project Path="Triplog.Entries.Domain/Triplog.Entries.Domain.csproj" />
+    <Project Path="Triplog.Entries.Infrastructure/Triplog.Entries.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Media/">
+    <Project Path="Triplog.Media.Api/Triplog.Media.Api.csproj" />
+    <Project Path="Triplog.Media.Application/Triplog.Media.Application.csproj" />
+    <Project Path="Triplog.Media.Domain/Triplog.Media.Domain.csproj" />
+    <Project Path="Triplog.Media.Infrastructure/Triplog.Media.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="compose.local.yml" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Triplog.Entries.Domain.UnitTests/Triplog.Entries.Domain.UnitTests.csproj" />
+    <Project Path="Triplog.Media.Domain.UnitTests/Triplog.Media.Domain.UnitTests.csproj" />
+  </Folder>
+  <Project Path="Triplog.AppHost/Triplog.AppHost.csproj" />
+  <Project Path="Triplog.ServiceDefaults/Triplog.ServiceDefaults.csproj" />
+</Solution>
