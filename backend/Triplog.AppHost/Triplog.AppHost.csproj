@@ -1,0 +1,24 @@
+﻿<Project Sdk="Aspire.AppHost.Sdk/13.2.4">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>7a2e3153-ff7e-45ce-9096-622dfc884f09</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Triplog.Entries.Api\Triplog.Entries.Api.csproj" />
+    <ProjectReference Include="..\Triplog.Media.Api\Triplog.Media.Api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="13.4.2" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.4.2" />
+    <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.4.2" />
+    <PackageReference Include="Aspire.Hosting.Redis" Version="13.4.2" />
+    <PackageReference Include="MessagePack" Version="3.1.7" />
+  </ItemGroup>
+
+</Project>
