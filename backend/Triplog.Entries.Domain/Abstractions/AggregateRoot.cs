@@ -12,7 +12,7 @@ public abstract class AggregateRoot<TId> : Entity<TId> where TId : struct
 
     protected AggregateRoot() { } // For EF Core
 
-    protected void RaiseDomainEvents(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
+    protected void RaiseDomainEvent(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
 
     public void ClearDomainEvents() => _domainEvents.Clear();
 }

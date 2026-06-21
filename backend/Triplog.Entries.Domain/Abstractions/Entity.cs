@@ -1,4 +1,4 @@
-﻿namespace Triplog.Entries.Domain.Common;
+﻿namespace Triplog.Entries.Domain.Abstractions;
 
 public abstract class Entity<TId> where TId : struct
 {
