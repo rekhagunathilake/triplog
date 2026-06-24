@@ -37,16 +37,16 @@ public sealed class Trip : AggregateRoot<TripId>
         TripTitle title,
         string? description,
         DateRange dates,
-        DateTime nowUtc) 
+        DateTime createTimeUtc) 
     {
-        var trip = new Trip(TripId.NewId(), ownerId, title, description, dates, TripStatus.Planning, nowUtc);
+        var trip = new Trip(TripId.NewId(), ownerId, title, description, dates, TripStatus.Planning, createTimeUtc);
 
-        trip.RaiseDomainEvent(new TripCreatedDomainEvent(trip.Id, ownerId, nowUtc));
+        trip.RaiseDomainEvent(new TripCreatedDomainEvent(trip.Id, ownerId, createTimeUtc));
 
         return Result.Success(trip);
     }
 
-    public Result UpdateDetails(TripTitle title, string? description, DateRange dates, DateTime nowUtc)
+    public Result UpdateDetails(TripTitle title, string? description, DateRange dates, DateTime updateTimeUtc)
     {
         if (Status == TripStatus.Archived)
             return Result.Failure(TripErrors.IsArchived);
@@ -55,12 +55,12 @@ public sealed class Trip : AggregateRoot<TripId>
         Description = description;
         Dates = dates;
 
-        RaiseDomainEvent(new TripDetailsUpdatedDomainEvent(Id, nowUtc));
+        RaiseDomainEvent(new TripDetailsUpdatedDomainEvent(Id, updateTimeUtc));
 
         return Result.Success();
     }
 
-    public Result Activate(DateTime nowUtc)
+    public Result Activate(DateTime activateTimeUtc)
     {
         if (Status == TripStatus.Archived)
             return Result.Failure(TripErrors.IsArchived);
@@ -70,12 +70,12 @@ public sealed class Trip : AggregateRoot<TripId>
 
         Status = TripStatus.Active;
 
-        RaiseDomainEvent(new TripActivatedDomainEvent(Id, nowUtc));
+        RaiseDomainEvent(new TripActivatedDomainEvent(Id, activateTimeUtc));
 
         return Result.Success();
     }
 
-    public Result Complete(DateTime nowUtc)
+    public Result Complete(DateTime completeTimeUtc)
     {
         if (Status == TripStatus.Archived)
             return Result.Failure(TripErrors.IsArchived);
@@ -85,20 +85,20 @@ public sealed class Trip : AggregateRoot<TripId>
 
         Status = TripStatus.Completed;
 
-        RaiseDomainEvent(new TripCompletedDomainEvent(Id, nowUtc));
+        RaiseDomainEvent(new TripCompletedDomainEvent(Id, completeTimeUtc));
 
         return Result.Success();
     }
 
-    public Result Archive(DateTime nowUtc)
+    public Result Archive(DateTime archiveTimeUtc)
     {
         if (Status == TripStatus.Archived)
             return Result.Failure(TripErrors.AlreadyArchived);
 
         Status = TripStatus.Archived;
-        ArchivedAtUtc = nowUtc;
+        ArchivedAtUtc = archiveTimeUtc;
 
-        RaiseDomainEvent(new TripArchivedDomainEvent(Id, nowUtc));
+        RaiseDomainEvent(new TripArchivedDomainEvent(Id, archiveTimeUtc));
 
         return Result.Success();
     }
