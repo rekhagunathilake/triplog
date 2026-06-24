@@ -15,7 +15,7 @@ internal static class TripFactory
                         title: CreateTitle("Test Title EBC"),
                         description: "Description",
                         dates: CreateDateRange(DateOnly.FromDateTime(FixedNowUtc).AddDays(30), DateOnly.FromDateTime(FixedNowUtc).AddDays(44)),
-                        nowUtc: FixedNowUtc).Value;
+                        createTimeUtc: FixedNowUtc).Value;
     }
 
     public static Trip CreateActiveTrip()
