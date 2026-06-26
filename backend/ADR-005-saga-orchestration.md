@@ -58,7 +58,7 @@ sequenceDiagram
     U->>E: POST /entries/{id}/publish
     E->>E: Entry.BeginPublish() → Publishing
     E->>R: Publish EntryPublishBegan
-    R->>R: Saga starts; sends FinalizeMediaCommand
+    R->>R: Saga starts and sends FinalizeMediaCommand
     R->>M: FinalizeMediaCommand
     M->>M: Generate thumbnails, extract EXIF
     M->>R: Publish MediaFinalized
