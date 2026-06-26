@@ -4,7 +4,7 @@ namespace Triplog.Entries.Domain.Abstractions;
 
 public abstract class AggregateRoot<TId> : Entity<TId> where TId : struct
 {
-    private readonly List<IDomainEvent> _domainEvents = new();
+    private readonly List<IDomainEvent> _domainEvents = [];
 
     public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
