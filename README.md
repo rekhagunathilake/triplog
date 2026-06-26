@@ -73,7 +73,7 @@ stateDiagram-v2
 
 ### Entry
 
-```mermain
+```mermaid
 stateDiagram-v2
     [*] --> Draft : Create
     Draft --> Publishing : BeginPublish (requires ≥1 media)
