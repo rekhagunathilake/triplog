@@ -113,6 +113,8 @@ The split itself isn't arbitrary either: **entries** is small, relational, trans
 3. **Saga lives in entries-api (orchestration, not choreography)** — `Entry` owns the publish state machine, so it's the natural orchestrator. Choreography would scatter state across services and obscure the failure-recovery story.
 4. **No authentication** — explicitly out of scope. Requests carry a fake `X-User-Id` header. Auth would add infrastructure noise that distracts from the distributed-system patterns this project is meant to show.
 
+> See [docs/decisions](docs/decisions/README.md) for the full set of architecture decision records.
+
 ## Getting started
 
 Prerequisites: .NET 10 SDK, Docker Desktop, Node 20+, pnpm.
