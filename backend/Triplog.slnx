@@ -2,7 +2,19 @@
   <Folder Name="/Contracts/">
     <Project Path="Triplog.Contracts/Triplog.Contracts.csproj" />
   </Folder>
-  <Folder Name="/docs/" />
+  <Folder Name="/docs/">
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/docs/decisions/">
+    <File Path="ADR-001-monorepo.md" />
+    <File Path="ADR-002-two-services.md" />
+    <File Path="ADR-003-entry-aggregate.md" />
+    <File Path="ADR-004-schema-per-service.md" />
+    <File Path="ADR-005-saga-orchestration.md" />
+    <File Path="ADR-006-no-auth-v1.md" />
+    <File Path="ADR-007-time-injection.md" />
+    <File Path="ADR-008-result-pattern.md" />
+  </Folder>
   <Folder Name="/Entries/">
     <Project Path="Triplog.Entries.Api/Triplog.Entries.Api.csproj" />
     <Project Path="Triplog.Entries.Application/Triplog.Entries.Application.csproj" />

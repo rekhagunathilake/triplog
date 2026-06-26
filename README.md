@@ -17,6 +17,21 @@ A two-service travel journal demonstrating .NET Aspire orchestration, MassTransi
 - **Modern .NET 10 minimal APIs** — typed results, OpenAPI metadata, Scalar API browser
 - **Next.js 15** frontend (TypeScript, Tailwind, shadcn/ui) talking to both services
 
+Tech inventory:
+
+| Layer | Choice | Why |
+|---|---|---|
+| .NET | 10 | Latest LTS-track at project start
+| ASP.NET Core | minimal APIs | Less ceremony than controllers; matches modern templates
+| Persistence | EF Core 10 + Postgres | Mature, queryable, ergonomic conversions
+| Messaging | MassTransit + RabbitMQ | Saga state machines first-class; AMQP via Aspire
+| Orchestration | .NET Aspire 13 | Single-file local infra graph + dashboard + tracing
+| Observability | OpenTelemetry (via Aspire) | Standard, vendor-neutral, free dashboard
+| Frontend | Next.js 16 + Tailwind 4 + shadcn 4 | React 19, app router, modern stack
+| Testing (Domain) | xUnit + FluentAssertions 7.2.2 | FA 7 is the last Apache 2.0 release
+| Blob storage | MinIO | S3-compatible, runs locally, zero cloud lock-in
+| Cache | Redis | Read cache + idempotency keys
+
 ## Architecture
 
 ```mermaid
@@ -36,6 +51,40 @@ flowchart LR
     OTel -.traces.-> Media
     OTel -.traces.-> Web
 ```
+
+## Domain lifecycle
+
+Each aggregate has an explicit state machine. These are the invariants enforced inside the aggregates — not just suggestions for the
+application layer.
+
+### Trip
+
+```mermaid
+stateDiagram-v2
+    [*] --> Planning : Create
+    Planning --> Active : Activate
+    Active --> Completed : Complete
+    Planning --> Archived : Archive
+    Active --> Archived : Archive
+    Completed --> Archived : Archive
+```
+
+> `UpdateDetails` is allowed from any non-archived state and does not transition.
+
+### Entry
+
+```mermaid
+stateDiagram-v2
+    [*] --> Draft : Create
+    Draft --> Publishing : BeginPublish (requires ≥1 media)
+    Publishing --> Published : CompletePublish
+    Publishing --> Draft : FailPublish (saga compensation)
+    Draft --> Archived : Archive
+    Publishing --> Archived : Archive
+    Published --> Archived : Archive
+```
+
+> `UpdateContent`, `AttachMedia`, and `RemoveMedia` are allowed only in `Draft` and do not transition.
 
 ## The publish-entry saga
 
@@ -63,6 +112,8 @@ The split itself isn't arbitrary either: **entries** is small, relational, trans
 2. **Each service owns its database schema** — two named databases (`entries`, `media`) on one Aspire-managed Postgres server in local dev. Keeps the boundary truthful (no cross-schema joins) without spinning two Postgres containers.
 3. **Saga lives in entries-api (orchestration, not choreography)** — `Entry` owns the publish state machine, so it's the natural orchestrator. Choreography would scatter state across services and obscure the failure-recovery story.
 4. **No authentication** — explicitly out of scope. Requests carry a fake `X-User-Id` header. Auth would add infrastructure noise that distracts from the distributed-system patterns this project is meant to show.
+
+> See [docs/decisions](backend/README.md) for the full set of architecture decision records.
 
 ## Getting started
 
