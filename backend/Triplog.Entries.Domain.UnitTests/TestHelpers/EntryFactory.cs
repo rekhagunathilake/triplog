@@ -27,6 +27,7 @@ internal static class EntryFactory
     public static Entry CreateDraftEntryWithMedia()
     {
         var entry = CreateDraftEntry();
+        entry.ClearDomainEvents();
         var mediaId = MediaReferenceId.NewId();
 
         EnsureSuccess(entry.AttachMedia(mediaId, FixedNowUtc.AddDays(1)), nameof(Entry.AttachMedia));
