@@ -277,4 +277,71 @@ public class EntryTests
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Be("Entry.IsArchived");
     }
+
+    // Begin publish
+
+    [Fact]
+    public void BeginPublish_FromDraftWithMedia_TransitionsToPublishingAndRaisesEvent()
+    {
+        var entry = EntryFactory.CreatePublishingEntry();
+
+        entry.DomainEvents.Should().ContainSingle().Which.Should().BeOfType<EntryPublishBeganDomainEvent>();
+        entry.Status.Should().Be(EntryStatus.Publishing);
+    }
+
+    [Fact]
+    public void BeginPublish_FromDraftWithNoMedia_ReturnsNoMediaAttachedError()
+    {
+        var entry = EntryFactory.CreateDraftEntry();
+
+        var result = entry.BeginPublish(EntryFactory.FixedNowUtc.AddDays(10));
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Entry.NoMediaAttached");
+    }
+
+    [Fact]
+    public void BeginPublish_FromPublishing_ReturnsNotDraftError()
+    {
+        var entry = EntryFactory.CreatePublishingEntry();
+
+        var result = entry.BeginPublish(EntryFactory.FixedNowUtc.AddDays(10));
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Entry.NotDraft");
+    }
+
+    [Fact]
+    public void BeginPublish_FromPublished_ReturnsNotDraftError()
+    {
+        var entry = EntryFactory.CreatePublishedEntry();
+
+        var result = entry.BeginPublish(EntryFactory.FixedNowUtc.AddDays(10));
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Entry.NotDraft");
+    }
+
+    [Fact]
+    public void BeginPublish_FromArchived_ReturnsIsArchivedError()
+    {
+        var entry = EntryFactory.CreateArchivedEntry();
+
+        var result = entry.BeginPublish(EntryFactory.FixedNowUtc.AddDays(10));
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Entry.IsArchived");
+    }
+
+    [Fact]
+    public void BeginPublish_AfterFailedPublish_ClearsLastPublishFailReason()
+    {
+        var entry = EntryFactory.CreateEntryWithFailedPublish();
+        var lastFailedReason = entry.LastPublishFailReason;
+
+        var result = entry.BeginPublish(EntryFactory.FixedNowUtc.AddDays(10));
+
+        result.IsSuccess.Should().BeTrue();
+        entry.LastPublishFailReason.Should().NotBe(lastFailedReason);
+    }
 }
