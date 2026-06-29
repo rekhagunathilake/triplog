@@ -38,6 +38,7 @@ internal static class EntryFactory
     public static Entry CreatePublishingEntry()
     {
         var entry = CreateDraftEntryWithMedia();
+        entry.ClearDomainEvents();
 
         EnsureSuccess(entry.BeginPublish(FixedNowUtc.AddDays(2)), nameof(Entry.BeginPublish));
 
