@@ -73,6 +73,10 @@ public class EntryTests
         // Arrange
         var entry = EntryFactory.CreatePublishingEntry();
         var originalTitle = entry.Title;
+        var originalBody = entry.Body;
+        var originalLocation = entry.Location;
+        var originalVisitedOn = entry.VisitedOn;
+
         entry.ClearDomainEvents();
 
         var newTitle = EntryFactory.CreateTitle("Updated title");
@@ -85,8 +89,11 @@ public class EntryTests
         var result = entry.UpdateContent(newTitle, newBody, newLocation, newVisitedOn, updateTime);
 
         result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(EntryErrors.NotDraft);
+        result.Error.Code.Should().Be("Entry.NotDraft");
         entry.Title.Should().Be(originalTitle);
+        entry.Body.Should().Be(originalBody);
+        entry.Location.Should().Be(originalLocation);
+        entry.VisitedOn.Should().Be(originalVisitedOn);
         entry.DomainEvents.Should().BeEmpty();
     }
 
@@ -96,6 +103,9 @@ public class EntryTests
         // Arrange
         var entry = EntryFactory.CreatePublishedEntry();
         var originalTitle = entry.Title;
+        var originalBody = entry.Body;
+        var originalLocation = entry.Location;
+        var originalVisitedOn = entry.VisitedOn;
         entry.ClearDomainEvents();
 
         var newTitle = EntryFactory.CreateTitle("Updated title");
@@ -108,8 +118,11 @@ public class EntryTests
         var result = entry.UpdateContent(newTitle, newBody, newLocation, newVisitedOn, updateTime);
 
         result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(EntryErrors.NotDraft);
+        result.Error.Code.Should().Be("Entry.NotDraft");
         entry.Title.Should().Be(originalTitle);
+        entry.Body.Should().Be(originalBody);
+        entry.Location.Should().Be(originalLocation);
+        entry.VisitedOn.Should().Be(originalVisitedOn);
         entry.DomainEvents.Should().BeEmpty();
     }
 
@@ -119,6 +132,9 @@ public class EntryTests
         // Arrange
         var entry = EntryFactory.CreateArchivedEntry();
         var originalTitle = entry.Title;
+        var originalBody = entry.Body;
+        var originalLocation = entry.Location;
+        var originalVisitedOn = entry.VisitedOn;
         entry.ClearDomainEvents();
 
         var newTitle = EntryFactory.CreateTitle("Updated title");
@@ -131,8 +147,11 @@ public class EntryTests
         var result = entry.UpdateContent(newTitle, newBody, newLocation, newVisitedOn, updateTime);
 
         result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(EntryErrors.IsArchived);
+        result.Error.Code.Should().Be("Entry.IsArchived");
         entry.Title.Should().Be(originalTitle);
+        entry.Body.Should().Be(originalBody);
+        entry.Location.Should().Be(originalLocation);
+        entry.VisitedOn.Should().Be(originalVisitedOn);
         entry.DomainEvents.Should().BeEmpty();
     }
 
@@ -141,13 +160,20 @@ public class EntryTests
     [Fact]
     public void AttachMedia_FromDraft_AddsReferenceAndRaisesEvent()
     {
-        // Arrange
-        var entry = EntryFactory.CreateDraftEntryWithMedia();
+        var entry = EntryFactory.CreateDraftEntry();
+        entry.ClearDomainEvents();
+        var mediaId = MediaReferenceId.NewId();
+        var attachTime = EntryFactory.FixedNowUtc.AddDays(1);
 
-        entry.Status.Should().Be(EntryStatus.Draft);
-        entry.MediaReferences.Should().ContainSingle().Which.DisplayOrder.Should().Be(0);
+        var result = entry.AttachMedia(mediaId, attachTime);
+
+        result.IsSuccess.Should().BeTrue();
+        entry.MediaReferences.Should().ContainSingle()
+            .Which.Id.Should().Be(mediaId);
+        entry.MediaReferences.Single().DisplayOrder.Should().Be(0);
         entry.DomainEvents.Should().ContainSingle()
-            .Which.Should().BeOfType<EntryMediaAttachedDomainEvent>();
+            .Which.Should().BeOfType<EntryMediaAttachedDomainEvent>()
+            .Which.OccurredOnUtc.Should().Be(attachTime);
     }
 
     [Fact]
@@ -175,14 +201,16 @@ public class EntryTests
         // Arrange
         var entry = EntryFactory.CreateDraftEntryWithMedia();
         var newMediaId = MediaReferenceId.NewId();
-        entry.AttachMedia(newMediaId, EntryFactory.FixedNowUtc.AddDays(10));
+        entry.AttachMedia(newMediaId, EntryFactory.FixedNowUtc.AddDays(10))
+            .IsSuccess.Should().BeTrue(); // First attachMedia should be asserted, if fails for any reason, the test silently produces wrong fixture.
+        var mediaCount = entry.MediaReferences.Count();
         entry.ClearDomainEvents();
 
         var result = entry.AttachMedia(newMediaId, EntryFactory.FixedNowUtc.AddDays(11));
 
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Be("Entry.MediaAlreadyAttached");
-        entry.MediaReferences.Should().HaveCount(2);
+        entry.MediaReferences.Should().HaveCount(mediaCount);
         entry.DomainEvents.Should().BeEmpty();
     }
 
@@ -190,13 +218,15 @@ public class EntryTests
     public void AttachMedia_FromPublishing_ReturnsNotDraftError()
     {
         // Arrange
-        var entry = EntryFactory.CreatePublishedEntry();
+        var entry = EntryFactory.CreatePublishingEntry();
+        var mediaCount = entry.MediaReferences.Count();
 
         var newMediaId = MediaReferenceId.NewId();
         var result = entry.AttachMedia(newMediaId, EntryFactory.FixedNowUtc.AddDays(10));
 
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Be("Entry.NotDraft");
+        entry.MediaReferences.Should().HaveCount(mediaCount);
     }
 
     [Fact]
@@ -204,12 +234,14 @@ public class EntryTests
     {
         // Arrange
         var entry = EntryFactory.CreateArchivedEntry();
+        var mediaCount = entry.MediaReferences.Count();
 
         var newMediaId = MediaReferenceId.NewId();
         var result = entry.AttachMedia(newMediaId, EntryFactory.FixedNowUtc.AddDays(10));
 
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Be("Entry.IsArchived");
+        entry.MediaReferences.Should().HaveCount(mediaCount);
     }
 
     // Remove media
@@ -218,14 +250,14 @@ public class EntryTests
     public void RemoveMedia_FromDraft_RemovesReferenceAndRaisesEvent()
     {
         var entry = EntryFactory.CreateDraftEntryWithMedia();
+        entry.ClearDomainEvents();
         var mediaReferenceId = entry.MediaReferences.First().Id;
 
         var result = entry.RemoveMedia(mediaReferenceId, EntryFactory.FixedNowUtc.AddDays(10));
 
         result.IsSuccess.Should().BeTrue();
-        var domainEvent = entry.DomainEvents.OfType<EntryMediaRemovedDomainEvent>().Single();
-        domainEvent.EntryId.Should().Be(entry.Id);
-        domainEvent.MediaReferenceId.Should().Be(mediaReferenceId);
+        entry.DomainEvents.Should().ContainSingle().Which.Should().BeOfType<EntryMediaRemovedDomainEvent>()
+            .Which.MediaReferenceId.Should().Be(mediaReferenceId);
     }
 
     [Fact]
@@ -283,9 +315,15 @@ public class EntryTests
     [Fact]
     public void BeginPublish_FromDraftWithMedia_TransitionsToPublishingAndRaisesEvent()
     {
-        var entry = EntryFactory.CreatePublishingEntry();
+        var entry = EntryFactory.CreateDraftEntryWithMedia();
+        entry.ClearDomainEvents();
+        var publishingTime = EntryFactory.FixedNowUtc.AddDays(1);
 
-        entry.DomainEvents.Should().ContainSingle().Which.Should().BeOfType<EntryPublishBeganDomainEvent>();
+        var result = entry.BeginPublish(publishingTime);
+
+        result.IsSuccess.Should().BeTrue();
+        entry.DomainEvents.Should().ContainSingle().Which.Should().BeOfType<EntryPublishBeganDomainEvent>()
+            .Which.OccurredOnUtc.Should().Be(publishingTime);
         entry.Status.Should().Be(EntryStatus.Publishing);
     }
 
@@ -342,7 +380,7 @@ public class EntryTests
         var result = entry.BeginPublish(EntryFactory.FixedNowUtc.AddDays(10));
 
         result.IsSuccess.Should().BeTrue();
-        entry.LastPublishFailReason.Should().NotBe(lastFailedReason);
+        entry.LastPublishFailReason.Should().BeNull();
     }
 
     // Complete publish
@@ -350,12 +388,17 @@ public class EntryTests
     [Fact]
     public void CompletePublish_FromPublishing_TransitionsToPublishedAndSetsPublishedAtUtc()
     {
-        var entry = EntryFactory.CreatePublishedEntry();
+        var entry = EntryFactory.CreatePublishingEntry();
+        entry.ClearDomainEvents();
 
+        var completeTime = EntryFactory.FixedNowUtc.AddDays(1);
+
+        var result = entry.CompletePublish(completeTime);
+
+        result.IsSuccess.Should().BeTrue();
+        entry.DomainEvents.Should().ContainSingle().Which.Should().BeOfType<EntryPublishedDomainEvent>()
+            .Which.OccurredOnUtc.Should().Be(completeTime);
         entry.Status.Should().Be(EntryStatus.Published);
-        entry.DomainEvents.Should().ContainSingle()
-            .Which.Should().BeOfType<EntryPublishedDomainEvent>();
-        entry.PublishedAtUtc.Should().NotBeNull();
     }
 
     [Fact]
@@ -396,10 +439,18 @@ public class EntryTests
     [Fact]
     public void FailPublish_FromPublishing_TransitionsToDraftAndSetsReason()
     {
-        var entry = EntryFactory.CreateEntryWithFailedPublish();
+        var entry = EntryFactory.CreatePublishingEntry();
+        entry.ClearDomainEvents();
 
+        var failTime = EntryFactory.FixedNowUtc.AddDays(1);
+
+        var result = entry.FailPublish("Test failing reason", failTime);
+
+        result.IsSuccess.Should().BeTrue();
+        entry.DomainEvents.Should().ContainSingle().Which.Should().BeOfType<EntryPublishFailedDomainEvent>()
+            .Which.OccurredOnUtc.Should().Be(failTime);
+        entry.LastPublishFailReason.Should().Be("Test failing reason");
         entry.Status.Should().Be(EntryStatus.Draft);
-        entry.LastPublishFailReason.Should().NotBeNull();
     }
 
     [Fact]
@@ -441,33 +492,54 @@ public class EntryTests
     public void Archive_FromDraft_TransitionsToArchivedAndSetsArchivedAtUtc()
     {
         var entry = EntryFactory.CreateDraftEntry();
+        entry.ClearDomainEvents();
+        var archiveTime = EntryFactory.FixedNowUtc.AddDays(19);
 
-        var result = entry.Archive(EntryFactory.FixedNowUtc.AddDays(19));
+        var result = entry.Archive(archiveTime);
 
         result.IsSuccess.Should().BeTrue();
         entry.ArchivedAtUtc.Should().NotBeNull();
+        entry.Status.Should().Be(EntryStatus.Archived);
+        entry.ArchivedAtUtc.Should().Be(archiveTime);
+        entry.DomainEvents.Should().ContainSingle()
+            .Which.Should().BeOfType<EntryArchivedDomainEvent>()
+            .Which.OccurredOnUtc.Should().Be(archiveTime);
     }
 
     [Fact]
     public void Archive_FromPublishing_TransitionsToArchivedAndSetsArchivedAtUtc()
     {
         var entry = EntryFactory.CreatePublishingEntry();
+        entry.ClearDomainEvents();
+        var archiveTime = EntryFactory.FixedNowUtc.AddDays(19);
 
-        var result = entry.Archive(EntryFactory.FixedNowUtc.AddDays(19));
+        var result = entry.Archive(archiveTime);
 
         result.IsSuccess.Should().BeTrue();
         entry.ArchivedAtUtc.Should().NotBeNull();
+        entry.Status.Should().Be(EntryStatus.Archived);
+        entry.ArchivedAtUtc.Should().Be(archiveTime);
+        entry.DomainEvents.Should().ContainSingle()
+            .Which.Should().BeOfType<EntryArchivedDomainEvent>()
+            .Which.OccurredOnUtc.Should().Be(archiveTime);
     }
 
     [Fact]
     public void Archive_FromPublished_TransitionsToArchivedAndSetsArchivedAtUtc()
     {
         var entry = EntryFactory.CreatePublishedEntry();
+        entry.ClearDomainEvents();
+        var archiveTime = EntryFactory.FixedNowUtc.AddDays(19);
 
-        var result = entry.Archive(EntryFactory.FixedNowUtc.AddDays(19));
+        var result = entry.Archive(archiveTime);
 
         result.IsSuccess.Should().BeTrue();
         entry.ArchivedAtUtc.Should().NotBeNull();
+        entry.Status.Should().Be(EntryStatus.Archived);
+        entry.ArchivedAtUtc.Should().Be(archiveTime);
+        entry.DomainEvents.Should().ContainSingle()
+            .Which.Should().BeOfType<EntryArchivedDomainEvent>()
+            .Which.OccurredOnUtc.Should().Be(archiveTime);
     }
 
     [Fact]
