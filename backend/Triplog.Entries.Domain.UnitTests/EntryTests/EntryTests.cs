@@ -344,4 +344,50 @@ public class EntryTests
         result.IsSuccess.Should().BeTrue();
         entry.LastPublishFailReason.Should().NotBe(lastFailedReason);
     }
+
+    // Complete publish
+
+    [Fact]
+    public void CompletePublish_FromPublishing_TransitionsToPublishedAndSetsPublishedAtUtc()
+    {
+        var entry = EntryFactory.CreatePublishedEntry();
+
+        entry.Status.Should().Be(EntryStatus.Published);
+        entry.DomainEvents.Should().ContainSingle()
+            .Which.Should().BeOfType<EntryPublishedDomainEvent>();
+        entry.PublishedAtUtc.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void CompletePublish_FromDraft_ReturnsInvalidStatusTransition()
+    {
+        var entry = EntryFactory.CreateDraftEntry();
+
+        var result = entry.CompletePublish(EntryFactory.FixedNowUtc.AddDays(19));
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Entry.InvalidStatusTransition");
+    }
+
+    [Fact]
+    public void CompletePublish_FromPublished_ReturnsInvalidStatusTransition()
+    {
+        var entry = EntryFactory.CreatePublishedEntry();
+
+        var result = entry.CompletePublish(EntryFactory.FixedNowUtc.AddDays(19));
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Entry.InvalidStatusTransition");
+    }
+
+    [Fact]
+    public void CompletePublish_FromArchived_ReturnsIsArchivedError()
+    {
+        var entry = EntryFactory.CreateArchivedEntry();
+
+        var result = entry.CompletePublish(EntryFactory.FixedNowUtc.AddDays(19));
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Entry.IsArchived");
+    }
 }
