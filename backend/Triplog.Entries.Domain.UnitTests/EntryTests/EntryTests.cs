@@ -434,4 +434,50 @@ public class EntryTests
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Be("Entry.IsArchived");
     }
+
+    // Archive
+
+    [Fact]
+    public void Archive_FromDraft_TransitionsToArchivedAndSetsArchivedAtUtc()
+    {
+        var entry = EntryFactory.CreateDraftEntry();
+
+        var result = entry.Archive(EntryFactory.FixedNowUtc.AddDays(19));
+
+        result.IsSuccess.Should().BeTrue();
+        entry.ArchivedAtUtc.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void Archive_FromPublishing_TransitionsToArchivedAndSetsArchivedAtUtc()
+    {
+        var entry = EntryFactory.CreatePublishingEntry();
+
+        var result = entry.Archive(EntryFactory.FixedNowUtc.AddDays(19));
+
+        result.IsSuccess.Should().BeTrue();
+        entry.ArchivedAtUtc.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void Archive_FromPublished_TransitionsToArchivedAndSetsArchivedAtUtc()
+    {
+        var entry = EntryFactory.CreatePublishedEntry();
+
+        var result = entry.Archive(EntryFactory.FixedNowUtc.AddDays(19));
+
+        result.IsSuccess.Should().BeTrue();
+        entry.ArchivedAtUtc.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void Archive_FromArchived_ReturnsAlreadyArchivedError()
+    {
+        var entry = EntryFactory.CreateArchivedEntry();
+
+        var result = entry.Archive(EntryFactory.FixedNowUtc.AddDays(19));
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Entry.AlreadyArchived");
+    }
 }
