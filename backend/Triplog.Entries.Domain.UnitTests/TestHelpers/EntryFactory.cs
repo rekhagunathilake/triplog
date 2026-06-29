@@ -46,7 +46,7 @@ internal static class EntryFactory
 
     public static Entry CreateEntryWithFailedPublish()
     {
-        var entry = CreateDraftEntryWithMedia();
+        var entry = CreatePublishingEntry();
 
         EnsureSuccess(entry.FailPublish("Test reason", FixedNowUtc.AddDays(3)), nameof(Entry.FailPublish));
 
