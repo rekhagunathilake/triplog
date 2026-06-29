@@ -1,7 +1,10 @@
 ﻿using FluentAssertions;
+using Triplog.Entries.Domain.Abstractions;
 using Triplog.Entries.Domain.Common;
 using Triplog.Entries.Domain.Entries;
 using Triplog.Entries.Domain.Entries.Events;
+using Triplog.Entries.Domain.Trips;
+using Triplog.Entries.Domain.Trips.Events;
 using Triplog.Entries.Domain.UnitTests.TestHelpers;
 
 namespace Triplog.Entries.Domain.UnitTests.EntryTests;
@@ -130,5 +133,79 @@ public class EntryTests
         result.Error.Should().Be(EntryErrors.IsArchived);
         entry.Title.Should().Be(originalTitle);
         entry.DomainEvents.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void AttachMedia_FromDraft_AddsReferenceAndRaisesEvent()
+    {
+        // Arrange
+        var entry = EntryFactory.CreateDraftEntryWithMedia();
+
+        entry.Status.Should().Be(EntryStatus.Draft);
+        entry.MediaReferences.Should().ContainSingle().Which.DisplayOrder.Should().Be(0);
+        entry.DomainEvents.Should().ContainSingle()
+            .Which.Should().BeOfType<EntryMediaAttachedDomainEvent>();
+    }
+
+    [Fact]
+    public void AttachMedia_SecondAttachment_AssignsDisplayOrder1()
+    {
+        // Arrange
+        var entry = EntryFactory.CreateDraftEntryWithMedia();
+        entry.ClearDomainEvents();
+        var newMediaId = MediaReferenceId.NewId();
+
+        var result = entry.AttachMedia(newMediaId, EntryFactory.FixedNowUtc.AddDays(10));
+
+        result.IsSuccess.Should().BeTrue();
+        entry.Status.Should().Be(EntryStatus.Draft);
+        entry.MediaReferences.Should().HaveCount(2);
+        entry.DomainEvents.Should().ContainSingle()
+            .Which.Should().BeOfType<EntryMediaAttachedDomainEvent>();
+        entry.MediaReferences.Last().Id.Should().Be(newMediaId);
+        entry.MediaReferences.Last().DisplayOrder.Should().Be(1);
+    }
+
+    [Fact]
+    public void AttachMedia_DuplicateMediaReferenceId_ReturnsMediaAlreadyAttachedError()
+    {
+        // Arrange
+        var entry = EntryFactory.CreateDraftEntryWithMedia();
+        var newMediaId = MediaReferenceId.NewId();
+        entry.AttachMedia(newMediaId, EntryFactory.FixedNowUtc.AddDays(10));
+        entry.ClearDomainEvents();
+
+        var result = entry.AttachMedia(newMediaId, EntryFactory.FixedNowUtc.AddDays(11));
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Entry.MediaAlreadyAttached");
+        entry.MediaReferences.Should().HaveCount(2);
+        entry.DomainEvents.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void AttachMedia_FromPublishing_ReturnsNotDraftError()
+    {
+        // Arrange
+        var entry = EntryFactory.CreatePublishedEntry();
+
+        var newMediaId = MediaReferenceId.NewId();
+        var result = entry.AttachMedia(newMediaId, EntryFactory.FixedNowUtc.AddDays(10));
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Entry.NotDraft");
+    }
+
+    [Fact]
+    public void AttachMedia_FromArchived_ReturnsIsArchivedError()
+    {
+        // Arrange
+        var entry = EntryFactory.CreateArchivedEntry();
+
+        var newMediaId = MediaReferenceId.NewId();
+        var result = entry.AttachMedia(newMediaId, EntryFactory.FixedNowUtc.AddDays(10));
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Entry.IsArchived");
     }
 }
