@@ -1,16 +1,15 @@
 ﻿using FluentAssertions;
-using Triplog.Entries.Domain.Abstractions;
 using Triplog.Entries.Domain.Common;
 using Triplog.Entries.Domain.Entries;
 using Triplog.Entries.Domain.Entries.Events;
-using Triplog.Entries.Domain.Trips;
-using Triplog.Entries.Domain.Trips.Events;
 using Triplog.Entries.Domain.UnitTests.TestHelpers;
 
 namespace Triplog.Entries.Domain.UnitTests.EntryTests;
 
 public class EntryTests
 {
+    //Create 
+
     [Fact]
     public void Create_WithValidInputs_InitializesEntryInDraftStatus()
     {
@@ -37,6 +36,8 @@ public class EntryTests
         domainEvent.OwnerId.Should().Be(entry.OwnerId);
         domainEvent.OccurredOnUtc.Should().Be(EntryFactory.FixedNowUtc);
     }
+
+    // Update content 
 
     [Fact]
     public void UpdateContent_FromDraft_AppliesChangesAndRaisesEvent()
@@ -135,6 +136,8 @@ public class EntryTests
         entry.DomainEvents.Should().BeEmpty();
     }
 
+    // Attach media
+
     [Fact]
     public void AttachMedia_FromDraft_AddsReferenceAndRaisesEvent()
     {
@@ -204,6 +207,72 @@ public class EntryTests
 
         var newMediaId = MediaReferenceId.NewId();
         var result = entry.AttachMedia(newMediaId, EntryFactory.FixedNowUtc.AddDays(10));
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Entry.IsArchived");
+    }
+
+    // Remove media
+
+    [Fact]
+    public void RemoveMedia_FromDraft_RemovesReferenceAndRaisesEvent()
+    {
+        var entry = EntryFactory.CreateDraftEntryWithMedia();
+        var mediaReferenceId = entry.MediaReferences.First().Id;
+
+        var result = entry.RemoveMedia(mediaReferenceId, EntryFactory.FixedNowUtc.AddDays(10));
+
+        result.IsSuccess.Should().BeTrue();
+        var domainEvent = entry.DomainEvents.OfType<EntryMediaRemovedDomainEvent>().Single();
+        domainEvent.EntryId.Should().Be(entry.Id);
+        domainEvent.MediaReferenceId.Should().Be(mediaReferenceId);
+    }
+
+    [Fact]
+    public void RemoveMedia_UnknownMediaReferenceId_ReturnsMediaNotFoundError()
+    {
+        var entry = EntryFactory.CreateDraftEntryWithMedia();
+
+        var result = entry.RemoveMedia(MediaReferenceId.NewId(), EntryFactory.FixedNowUtc.AddDays(10));
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Entry.MediaNotFound");
+    }
+
+    [Fact]
+    public void RemoveMedia_FromPublishing_ReturnsNotDraftError()
+    {
+        // Arrange
+        var entry = EntryFactory.CreatePublishingEntry();
+        var mediaReferenceId = entry.MediaReferences.First().Id;
+
+        var result = entry.RemoveMedia(mediaReferenceId, EntryFactory.FixedNowUtc.AddDays(10));
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Entry.NotDraft");
+    }
+
+    [Fact]
+    public void RemoveMedia_FromPublished_ReturnsNotDraftError()
+    {
+        // Arrange
+        var entry = EntryFactory.CreatePublishedEntry();
+        var mediaReferenceId = entry.MediaReferences.First().Id;
+
+        var result = entry.RemoveMedia(mediaReferenceId, EntryFactory.FixedNowUtc.AddDays(10));
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Entry.NotDraft");
+    }
+
+    [Fact]
+    public void RemoveMedia_FromArchived_ReturnsIsArchivedError()
+    {
+        // Arrange
+        var entry = EntryFactory.CreateArchivedEntry();
+        var mediaReferenceId = entry.MediaReferences.First().Id;
+
+        var result = entry.RemoveMedia(mediaReferenceId, EntryFactory.FixedNowUtc.AddDays(10));
 
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Be("Entry.IsArchived");
