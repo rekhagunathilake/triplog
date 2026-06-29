@@ -48,6 +48,7 @@ internal static class EntryFactory
     public static Entry CreateEntryWithFailedPublish()
     {
         var entry = CreatePublishingEntry();
+        entry.ClearDomainEvents();
 
         EnsureSuccess(entry.FailPublish("Test reason", FixedNowUtc.AddDays(3)), nameof(Entry.FailPublish));
 
@@ -57,6 +58,7 @@ internal static class EntryFactory
     public static Entry CreatePublishedEntry()
     {
         var entry = CreatePublishingEntry();
+        entry.ClearDomainEvents();
 
         EnsureSuccess(entry.CompletePublish(FixedNowUtc.AddDays(4)), nameof(Entry.CompletePublish));
 
@@ -66,6 +68,7 @@ internal static class EntryFactory
     public static Entry CreateArchivedEntry()
     {
         var entry = CreatePublishedEntry();
+        entry.ClearDomainEvents();
 
         EnsureSuccess(entry.Archive(FixedNowUtc.AddDays(5)), nameof(Entry.Archive));
 
