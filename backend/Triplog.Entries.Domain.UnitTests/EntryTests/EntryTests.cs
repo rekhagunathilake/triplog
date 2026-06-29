@@ -390,4 +390,48 @@ public class EntryTests
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Be("Entry.IsArchived");
     }
+
+    // Fail publish
+
+    [Fact]
+    public void FailPublish_FromPublishing_TransitionsToDraftAndSetsReason()
+    {
+        var entry = EntryFactory.CreateEntryWithFailedPublish();
+
+        entry.Status.Should().Be(EntryStatus.Draft);
+        entry.LastPublishFailReason.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void FailPublish_FromDraft_ReturnsInvalidStatusTransition()
+    {
+        var entry = EntryFactory.CreateDraftEntry();
+
+        var result = entry.FailPublish("Failing reason" ,EntryFactory.FixedNowUtc.AddDays(19));
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Entry.InvalidStatusTransition");
+    }
+
+    [Fact]
+    public void FailPublish_FromPublished_ReturnsInvalidStatusTransition()
+    {
+        var entry = EntryFactory.CreatePublishedEntry();
+
+        var result = entry.FailPublish("Failing reason", EntryFactory.FixedNowUtc.AddDays(19));
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Entry.InvalidStatusTransition");
+    }
+
+    [Fact]
+    public void FailPublish_FromArchived_ReturnsIsArchivedError()
+    {
+        var entry = EntryFactory.CreateArchivedEntry();
+
+        var result = entry.FailPublish("Failing reason", EntryFactory.FixedNowUtc.AddDays(19));
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Be("Entry.IsArchived");
+    }
 }
