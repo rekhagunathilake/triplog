@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Triplog.Entries.Domain.Common;
 
-namespace Triplog.Entries.Application.Abstractions
+namespace Triplog.Entries.Application.Abstractions;
+
+public interface ICurrentUser
 {
-    internal interface ICurrentUser
-    {
-    }
+    public OwnerId UserId { get; }
 }

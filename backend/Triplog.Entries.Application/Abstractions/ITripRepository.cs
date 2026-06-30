@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Triplog.Entries.Domain.Trips;
 
-namespace Triplog.Entries.Application.Abstractions
+namespace Triplog.Entries.Application.Abstractions;
+
+public interface ITripRepository
 {
-    internal interface ITripRepository
-    {
-    }
+    Task AddAsync(Trip trip, CancellationToken ct = default);
+
+    Task<Trip?> GetByIdAsync(TripId id, CancellationToken ct = default);
 }

@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace Triplog.Entries.Application.Abstractions;
 
-namespace Triplog.Entries.Application.Abstractions
+public interface IUnitOfWork
 {
-    internal interface IUnitOfWork
-    {
-    }
+    Task<int> SaveChangesAsync(CancellationToken ct = default);
 }

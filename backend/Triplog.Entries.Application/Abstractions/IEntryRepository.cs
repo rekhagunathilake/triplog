@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Triplog.Entries.Domain.Entries;
 
-namespace Triplog.Entries.Application.Abstractions
+namespace Triplog.Entries.Application.Abstractions;
+
+public interface IEntryRepository
 {
-    internal interface IEntryRepository
-    {
-    }
+    Task AddAsync(Entry entry, CancellationToken ct = default);
+
+    Task<Entry?> GetByIdAsync(EntryId id, CancellationToken ct = default);
 }
