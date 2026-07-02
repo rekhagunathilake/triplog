@@ -39,4 +39,7 @@ public static class EntryErrors
 
     public static readonly Error AlreadyArchived = 
         Error.Validation("Entry.AlreadyArchived", "Entry is already archived.");
+
+    public static readonly Error NotFound = 
+        Error.Validation("Entry.NotFound", "Entry not found.");
 }
