@@ -7,25 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Entries\Commands\CreateEntry\" />
-    <Folder Include="Entries\Commands\AttachMedia\" />
-    <Folder Include="Entries\Commands\CompletePublish\" />
-    <Folder Include="Entries\Commands\FailPublish\" />
-    <Folder Include="Entries\Commands\ArchiveEntry\" />
-    <Folder Include="Entries\Commands\PublishEntry\" />
-    <Folder Include="Entries\Commands\RemoveMedia\" />
-    <Folder Include="Entries\Commands\UpdateContent\" />
-    <Folder Include="Entries\Queries\GetEntryById\" />
-    <Folder Include="Entries\Queries\ListEntriesByTrip\" />
-    <Folder Include="Trips\Commands\ActivateTrip\" />
-    <Folder Include="Trips\Commands\CompleteTrip\" />
-    <Folder Include="Trips\Commands\ArchiveTrip\" />
-    <Folder Include="Trips\Commands\UpdateTripDetails\" />
-    <Folder Include="Trips\Queries\GetTripById\" />
-    <Folder Include="Trips\Queries\ListTripsByOwner\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <PackageReference Include="MediatR" Version="12.5.0" />
