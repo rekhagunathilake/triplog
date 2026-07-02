@@ -15,3 +15,4 @@ Format follows [Michael Nygard's template](https://cognitect.com/blog/2011/11/15
 | 006 | [No authentication in v1](ADR-006-no-auth-v1.md)                       | Accepted | 2026-06-21 |
 | 007 | [Time injection in the Domain layer](ADR-007-time-injection.md)        | Accepted | 2026-06-21 |
 | 008 | [Result<T> pattern over thrown exceptions](ADR-008-result-pattern.md)  | Accepted | 2026-06-21 |
+| 009 | [ValidationBehavior throws instead of Result](ADR-009-validation-throws-instead-of-result.md) | Accepted | 2026-06-30 |
