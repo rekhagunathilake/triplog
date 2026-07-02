@@ -1,6 +1,4 @@
-﻿using Triplog.Entries.Domain.Common;
-
-namespace Triplog.Entries.Domain.Abstractions;
+﻿namespace Triplog.Entries.Domain.Abstractions;
 
 public abstract class AggregateRoot<TId> : Entity<TId> where TId : struct
 {
