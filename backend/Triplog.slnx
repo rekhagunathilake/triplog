@@ -14,6 +14,7 @@
     <File Path="ADR-006-no-auth-v1.md" />
     <File Path="ADR-007-time-injection.md" />
     <File Path="ADR-008-result-pattern.md" />
+    <File Path="ADR-009-validation-throws-instead-of-result.md" />
   </Folder>
   <Folder Name="/Entries/">
     <Project Path="Triplog.Entries.Api/Triplog.Entries.Api.csproj" />
