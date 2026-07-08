@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Triplog.Entries.Infrastructure.Queries
+namespace Triplog.Entries.Infrastructure.Persistence.Queries
 {
     internal class TripQueries
     {

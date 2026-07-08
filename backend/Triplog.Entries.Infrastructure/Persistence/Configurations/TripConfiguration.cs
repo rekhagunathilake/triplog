@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Triplog.Entries.Domain.Common;
 using Triplog.Entries.Domain.Trips;
 
-namespace Triplog.Entries.Infrastructure.Configurations;
+namespace Triplog.Entries.Infrastructure.Persistence.Configurations;
 
 public sealed class TripConfiguration : IEntityTypeConfiguration<Trip>
 {

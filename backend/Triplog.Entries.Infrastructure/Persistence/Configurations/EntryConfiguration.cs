@@ -4,7 +4,7 @@ using Triplog.Entries.Domain.Common;
 using Triplog.Entries.Domain.Entries;
 using Triplog.Entries.Domain.Trips;
 
-namespace Triplog.Entries.Infrastructure.Configurations;
+namespace Triplog.Entries.Infrastructure.Persistence.Configurations;
 
 public sealed class EntryConfiguration : IEntityTypeConfiguration<Entry>
 {
