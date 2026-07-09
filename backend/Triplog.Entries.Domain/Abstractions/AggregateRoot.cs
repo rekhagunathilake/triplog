@@ -1,6 +1,6 @@
 ﻿namespace Triplog.Entries.Domain.Abstractions;
 
-public abstract class AggregateRoot<TId> : Entity<TId> where TId : struct
+public abstract class AggregateRoot<TId> : Entity<TId>, IAggregateRoot where TId : struct
 {
     private readonly List<IDomainEvent> _domainEvents = [];
 

@@ -12,10 +12,10 @@ public sealed record Location
 
     public double Longitude { get; }
 
-    public Location(string name, double latitue, double longitude)
+    public Location(string name, double latitude, double longitude)
     {
         Name = name;
-        Latitude = latitue;
+        Latitude = latitude;
         Longitude = longitude;
     }
 
