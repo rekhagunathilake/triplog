@@ -1,6 +1,8 @@
-﻿namespace Triplog.Entries.Domain.Abstractions;
+﻿using MediatR;
 
-public interface IDomainEvent
+namespace Triplog.Entries.Domain.Abstractions;
+
+public interface IDomainEvent : INotification
 {
     DateTime OccurredOnUtc { get; }
 }

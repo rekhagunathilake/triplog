@@ -32,6 +32,11 @@ public static class DependencyInjection
         services.AddScoped<ITripQueries, TripQueries>();
         services.AddScoped<IEntryQueries, EntryQueries>();
 
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(typeof(TriplogEntriesDbContext).Assembly);
+        });
+
         return services;
     }
 }

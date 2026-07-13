@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Reflection;
 using Triplog.Entries.Application.Behaviors;
+using Triplog.Entries.Application.Trips.Commands.CreateTrip;
 
 namespace Triplog.Entries.Application;
 
@@ -14,7 +15,7 @@ public static class DependencyInjection
 
         services.AddMediatR(cfg =>
         {
-            cfg.RegisterServicesFromAssembly(assembly);
+            cfg.RegisterServicesFromAssembly(typeof(CreateTripCommand).Assembly);
             cfg.AddOpenBehavior(typeof(LoggingBehavior<,>)); // outermost behavior
             cfg.AddOpenBehavior(typeof(ValidationBehavior<,>)); // inside logging, outside of handlers
         });
