@@ -1,7 +1,9 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var postgres = builder.AddPostgres("postgres")
+var postgres = builder.AddPostgres("postgres", port: 5432) // Aspire remembers the password across restarts
+    .WithDataVolume()
     .WithPgAdmin();
+
 postgres.AddDatabase("entries");
 postgres.AddDatabase("media");
 
