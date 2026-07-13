@@ -30,6 +30,8 @@ if (app.Environment.IsDevelopment())
     await db.Database.MigrateAsync();
 }
 
+app.UseExceptionHandler();
+
 app.MapDefaultEndpoints();
 
 // Configure the HTTP request pipeline.
