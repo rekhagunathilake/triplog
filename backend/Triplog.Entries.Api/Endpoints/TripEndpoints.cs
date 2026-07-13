@@ -15,7 +15,7 @@ namespace Triplog.Entries.Api.Endpoints;
 
 public static class TripEndpoints
 {
-    public static void MapTripEndpoints(this WebApplication app)
+    public static void MapTripEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/trips")
             .WithTags("Trips");

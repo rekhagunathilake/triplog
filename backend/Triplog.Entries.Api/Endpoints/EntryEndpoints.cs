@@ -19,7 +19,7 @@ namespace Triplog.Entries.Api.Endpoints;
 
 public static class EntryEndpoints
 {
-    public static void MapEntryEndpoints(this WebApplication app)
+    public static void MapEntryEndpoints(this IEndpointRouteBuilder app)
     {
         // Entry-scoped operations under /entries
         var entries = app.MapGroup("/entries").WithTags("Entries");
