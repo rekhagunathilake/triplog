@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 using Triplog.Entries.Api.Auth;
 using Triplog.Entries.Api.Endpoints;
 using Triplog.Entries.Api.Http;
@@ -38,6 +39,7 @@ app.MapDefaultEndpoints();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
