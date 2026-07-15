@@ -112,6 +112,8 @@ The split itself isn't arbitrary either: **entries** is small, relational, trans
 2. **Each service owns its database schema** — two named databases (`entries`, `media`) on one Aspire-managed Postgres server in local dev. Keeps the boundary truthful (no cross-schema joins) without spinning two Postgres containers.
 3. **Saga lives in entries-api (orchestration, not choreography)** — `Entry` owns the publish state machine, so it's the natural orchestrator. Choreography would scatter state across services and obscure the failure-recovery story.
 4. **No authentication** — explicitly out of scope. Requests carry a fake `X-User-Id` header. Auth would add infrastructure noise that distracts from the distributed-system patterns this project is meant to show.
+5. **Time injection in the Domain layer** — all state-changing methods accept `DateTime nowUtc`, so tests are fully deterministic and there's no hidden `DateTime.UtcNow` call inside aggregates. See [ADR-007](backend/ADR-007-time-injection.md).
+6. **`Result<T>` for expected failures** — the API layer maps error codes to HTTP status (`.NotFound` → 404, state conflicts → 409, everything else → 400). Validation failures use FluentValidation and are the one exception path — see [ADR-008](backend/ADR-008-result-pattern.md) and [ADR-009](backend/ADR-009-validation-throws-instead-of-result.md).
 
 > See [docs/decisions](backend/README.md) for the full set of architecture decision records.
 
@@ -137,6 +139,60 @@ pnpm install
 pnpm dev
 ```
 
+## API reference
+
+entries-api exposes 17 endpoints — all wired through MediatR handlers with server-side FluentValidation, RFC 7807 ProblemDetails errors, and OpenAPI metadata. The full interactive reference lives at `/scalar/v1` on the entries-api URL (shown in the Aspire dashboard).
+
+### Trips
+
+| Verb | Route | Purpose |
+|---|---|---|
+| POST | `/trips` | Create a trip |
+| GET | `/trips` | List trips for current owner |
+| GET | `/trips/{id}` | Get a trip |
+| PUT | `/trips/{id}` | Update details |
+| POST | `/trips/{id}/activate` | Planning → Active |
+| POST | `/trips/{id}/complete` | Active → Completed |
+| POST | `/trips/{id}/archive` | Any → Archived |
+
+### Entries
+
+| Verb | Route | Purpose |
+|---|---|---|
+| POST | `/trips/{tripId}/entries` | Create an entry under a trip |
+| GET | `/trips/{tripId}/entries` | List entries in a trip |
+| GET | `/entries/{id}` | Get an entry |
+| PUT | `/entries/{id}/content` | Update title, body, location, date |
+| POST | `/entries/{id}/media/{mediaId}` | Attach media (idempotent within Draft) |
+| DELETE | `/entries/{id}/media/{mediaId}` | Detach media |
+| POST | `/entries/{id}/publish` | Draft → Publishing (kicks off saga in v1) |
+| POST | `/entries/{id}/publish/complete` | Saga-called: Publishing → Published |
+| POST | `/entries/{id}/publish/fail` | Saga-called: Publishing → Draft (compensation) |
+| POST | `/entries/{id}/archive` | Any non-Archived → Archived |
+
+Every request requires the `X-User-Id: <guid>` header (v1 fake auth — see [ADR-006](backend/ADR-006-no-auth-v1.md)). Missing or invalid header → 401.
+
+## Trying it out
+
+Once Aspire is running (`dotnet run --project backend/Triplog.AppHost`):
+
+1. From the Aspire dashboard, open the entries-api URL
+2. Add `/scalar/v1` to browse the API interactively
+3. Try `POST /trips` with header `X-User-Id: 11111111-1111-1111-1111-111111111111` and body:
+   ```json
+   { "title": "Italy 2026", "startDate": "2026-08-01", "endDate": "2026-08-14" }
+   ```
+4. Copy the returned id, then hit POST /trips/{id}/activate and POST /trips/{id}/entries
+5. Inspect resulting rows in pgAdmin (/pgadmin from the dashboard) under the entries database
+
+```markdown
+![Scalar API reference](backend/scalar-api-browser.png)
+![Trips Table](backend/trips.png)
+![Entries Table](backend/entries.png)
+![Entry Media References Table](backend/entry-media-references.png)
+![Saga Happy Path](backend/saga-happy-path.png)
+```
+
 ## Project layout
 
 ```
@@ -145,12 +201,19 @@ triplog/
 │   ├── Triplog.slnx
 │   ├── Triplog.AppHost/                Aspire orchestrator
 │   ├── Triplog.ServiceDefaults/        OTel, health checks, resilience, service discovery
-│   ├── Triplog.Contracts/              Shared MassTransit messages
-│   ├── Triplog.Entries.{Api,Application,Domain,Infrastructure}/
-│   ├── Triplog.Media.{Api,Application,Domain,Infrastructure}/
+│   ├── Triplog.Contracts/              Shared MassTransit messages (integration events)
+│   ├── Triplog.Entries.Api/            Minimal-API endpoints, exception handling, header auth
+│   ├── Triplog.Entries.Application/    CQRS commands + queries + validators + MediatR behaviors
+│   ├── Triplog.Entries.Domain/         Aggregates, VOs, domain events, strongly-typed IDs
+│   ├── Triplog.Entries.Infrastructure/ EF Core, Postgres, repositories, query projections
+│   │   └── Persistence/                DbContext, configurations, interceptors, UoW
+│   ├── Triplog.Media.{Api,...}/        (in progress)
 │   └── Triplog.{Entries,Media}.Domain.UnitTests/
-└── frontend/
-    └── web/                            Next.js 15, Tailwind, shadcn/ui
+├── frontend/
+│   └── web/                            Next.js 15, Tailwind, shadcn/ui
+└── docs/
+    ├── decisions/                      ADR-001 through ADR-012
+    └── screenshots/
 ```
 
 ## Explicitly out of scope for v1

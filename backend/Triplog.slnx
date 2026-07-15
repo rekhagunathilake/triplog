@@ -16,6 +16,14 @@
     <File Path="ADR-008-result-pattern.md" />
     <File Path="ADR-009-validation-throws-instead-of-result.md" />
   </Folder>
+  <Folder Name="/docs/screenshots/">
+    <File Path="aspire-dashboard.png" />
+    <File Path="entries.png" />
+    <File Path="entry-media-references.png" />
+    <File Path="saga-happy-path.png" />
+    <File Path="scalar-api-browser.png" />
+    <File Path="trips.png" />
+  </Folder>
   <Folder Name="/Entries/">
     <Project Path="Triplog.Entries.Api/Triplog.Entries.Api.csproj" />
     <Project Path="Triplog.Entries.Application/Triplog.Entries.Application.csproj" />
