@@ -15,4 +15,7 @@ public static class MediaItemErrors
 
     public static readonly Error InvalidStatusTransition =
         Error.Validation("MediaItem.InvalidStatusTransition", "The requested status transition is not allowed from the current status.");
+
+    public static readonly Error NotFound =
+        Error.Validation("MediaItem.NotFound", "Media item not found.");
 }
