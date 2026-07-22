@@ -22,6 +22,8 @@ builder.AddProject<Projects.Triplog_Entries_Api>("triplog-entries-api")
     .WithReference(rabbitmq).WaitFor(rabbitmq)
     .WithReference(redis).WaitFor(redis);
 
-builder.AddProject<Projects.Triplog_Media_Api>("triplog-media-api");
+builder.AddProject<Projects.Triplog_Media_Api>("triplog-media-api")
+    .WithReference(postgres).WaitFor(postgres)
+    .WithReference(rabbitmq).WaitFor(rabbitmq);
 
 builder.Build().Run();
