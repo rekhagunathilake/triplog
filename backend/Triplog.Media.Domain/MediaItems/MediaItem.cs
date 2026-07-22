@@ -7,8 +7,6 @@ namespace Triplog.Media.Domain.MediaItems;
 public sealed class MediaItem : AggregateRoot<MediaItemId>
 {
 
-    public MediaItemId MediaItemId { get; private set; }
-
     public OwnerId OwnerId { get; private set; }
 
     public BlobKey BlobKey { get; private set; } = null!;
