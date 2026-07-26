@@ -1,5 +1,12 @@
 using Microsoft.EntityFrameworkCore;
+using Minio;
+using Minio.DataModel.Args;
+using Scalar.AspNetCore;
+using Triplog.Media.Api.Auth;
+using Triplog.Media.Api.Endpoints;
+using Triplog.Media.Api.Http;
 using Triplog.Media.Application;
+using Triplog.Media.Application.Abstractions;
 using Triplog.Media.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,8 +17,10 @@ builder.AddServiceDefaults();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
-//builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, HeaderCurrentUser>();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
@@ -21,8 +30,15 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
+
     var db = scope.ServiceProvider.GetRequiredService<TriplogMediaDbContext>();
     await db.Database.MigrateAsync();
+
+    var minio = scope.ServiceProvider.GetRequiredService<IMinioClient>();
+    const string bucket = "triplog-media";
+    var exists = await minio.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucket));
+    if (!exists)
+        await minio.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucket));
 }
 
 app.UseExceptionHandler();
@@ -33,9 +49,10 @@ app.MapDefaultEndpoints();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    //app.MapScalarApiReference();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
+app.MapMediaEndpoints();
 
 app.Run();
