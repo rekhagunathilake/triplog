@@ -154,7 +154,7 @@ public sealed class Entry : AggregateRoot<EntryId>
         Status = EntryStatus.Published;
         PublishedAtUtc = publishTimeUtc;
 
-        RaiseDomainEvent(new EntryPublishedDomainEvent(Id, publishTimeUtc));
+        RaiseDomainEvent(new EntryPublishedDomainEvent(Id, OwnerId, publishTimeUtc));
 
         return Result.Success();
     }
@@ -170,7 +170,7 @@ public sealed class Entry : AggregateRoot<EntryId>
         Status = EntryStatus.Draft;
         LastPublishFailReason = reason;
 
-        RaiseDomainEvent(new EntryPublishFailedDomainEvent(Id, reason, failPublishTimeUtc));
+        RaiseDomainEvent(new EntryPublishFailedDomainEvent(Id, OwnerId, reason, failPublishTimeUtc));
 
         return Result.Success();
     }
