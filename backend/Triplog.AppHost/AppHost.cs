@@ -7,7 +7,8 @@ var postgres = builder.AddPostgres("postgres", port: 5432) // Aspire remembers t
 postgres.AddDatabase("entries");
 postgres.AddDatabase("media");
 
-var rabbitmq = builder.AddRabbitMQ("rabbitmq");
+var rabbitmq = builder.AddRabbitMQ("rabbitmq")
+    .WithManagementPlugin();
 var redis = builder.AddRedis("redis");
 
 var minio = builder.AddContainer("minio", "minio/minio")

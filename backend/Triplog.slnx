@@ -18,11 +18,8 @@
   </Folder>
   <Folder Name="/docs/screenshots/">
     <File Path="aspire-dashboard.png" />
-    <File Path="entries.png" />
-    <File Path="entry-media-references.png" />
-    <File Path="saga-happy-path.png" />
-    <File Path="scalar-api-browser.png" />
-    <File Path="trips.png" />
+    <File Path="minio.png" />
+    <File Path="saga-happy-path.jpg" />
   </Folder>
   <Folder Name="/Entries/">
     <Project Path="Triplog.Entries.Api/Triplog.Entries.Api.csproj" />
