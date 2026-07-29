@@ -7,7 +7,7 @@ public sealed record MediaItemDto(
     Guid OwnerId,
     string BlobKey,
     ContentType ContentType,
-    long SizeBytes,
+    long SizeInBytes,
     string OriginalFileName,
     MediaItemStatus Status,
     DateTime CreatedAtUtc,
