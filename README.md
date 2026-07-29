@@ -185,11 +185,9 @@ Once Aspire is running (`dotnet run --project backend/Triplog.AppHost`):
 4. Copy the returned id, then hit POST /trips/{id}/activate and POST /trips/{id}/entries
 5. Inspect resulting rows in pgAdmin (/pgadmin from the dashboard) under the entries database
 
-![Scalar API reference](backend/scalar-api-browser.png)
-![Trips Table](backend/trips.png)
-![Entries Table](backend/entries.png)
-![Entry Media References Table](backend/entry-media-references.png)
-![Saga Happy Path](backend/saga-happy-path.png)
+![Saga Happy Path Outcome](backend/saga-happy-path.jpg)
+![MinIO Bucket](backend/minio.png)
+![Aspire Dashboard](backend/aspire-dashboard.png)
 
 ## Project layout
 
