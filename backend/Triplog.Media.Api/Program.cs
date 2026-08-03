@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Minio;
 using Minio.DataModel.Args;
 using Scalar.AspNetCore;
+using System.Text.Json.Serialization;
 using Triplog.Media.Api.Auth;
 using Triplog.Media.Api.Endpoints;
 using Triplog.Media.Api.Http;
@@ -33,6 +34,11 @@ builder.Services.AddCors(options =>
         .AllowAnyMethod()
         .AllowAnyHeader();
     });
+});
+
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
 var app = builder.Build();
