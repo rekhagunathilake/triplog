@@ -5,7 +5,6 @@ const BASE_URL = process.env.NEXT_PUBLIC_ENTRIES_API_URL;
 // DTOs
 
 export type TripStatus = 'Planning' | 'Active' | 'Completed' | 'Archived';
-export type EntryStatus = 'Draft' | 'Publishing' | 'Published' | 'Archived';
 
 export interface TripSummary {
     id: string;
@@ -34,6 +33,52 @@ export interface CreateTripInput {
     endDate: string;
 }
 
+export type EntryStatus = 'Draft' | 'Publishing' | 'Published' | 'Archived';
+
+export interface EntrySummary {
+    id: string;
+    tripId: string;
+    title: string;
+    visitedOn: string;
+    status: EntryStatus;
+    mediaCount: number;
+}
+
+export interface Location {
+    name: string;
+    latitude: number;
+    longitude: number;
+}
+
+export interface MediaReference {
+    id: string;
+    displayOrder: number;
+}
+
+export interface Entry {
+    id: string;
+    tripId: string;
+    ownerId: string;
+    title: string;
+    location: Location | null;
+    visitedOn: string;
+    status: EntryStatus;
+    mediaReferences: MediaReference[];
+    createdAtUtc: string;
+    publishedAtUtc: string | null;
+    archivedAtUtc: string | null;
+    lastPublishFailReason: string | null;
+}
+
+export interface CreateEntryInput {
+    title: string;
+    body: string;
+    visitedOn: string;
+    locationName?: string;
+    latitude?: number;
+    longitude?: number;
+}
+
 // Client
 
 export const entriesApi = {
@@ -59,5 +104,19 @@ export const entriesApi = {
 
             archive: (id: string) =>
                 apiRequest({ baseUrl: BASE_URL!, path: `/trips/${id}/archive` , method: 'POST' }),
+    },
+    entries: {
+        listByTrip: (tripId: string) =>
+            apiRequest<EntrySummary[]>({ baseUrl: BASE_URL!, path: `/trips/${tripId}/entries`}),
+        
+        getById: (id: string) =>
+            apiRequest<Entry>({ baseUrl: BASE_URL!, path: `/entries/${id}` }),
+
+        create: (tripId: string, input: CreateEntryInput) =>
+            apiRequest<{ id: string }>({
+                baseUrl: BASE_URL!,
+                path: `/trips/${tripId}/entries`,
+                json: input,
+            }),
     },
 };
