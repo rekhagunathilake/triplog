@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { mediaApi } from './media-api';
 import { entriesApi } from './entries-api';
 import { ApiError } from './api-error';
-import { setegid } from 'process';
 
 type UploadState = 'idle' | 'requesting' | 'uploading' | 'attaching' | 'done' | 'error';
 
@@ -50,7 +49,7 @@ export function useUpload() {
     }
 
     function reset() {
-    setState('upload');
+    setState('idle');
     setProgress(0);
     setError(null);
   }
