@@ -60,6 +60,7 @@ export interface Entry {
     tripId: string;
     ownerId: string;
     title: string;
+    body: string;
     location: Location | null;
     visitedOn: string;
     status: EntryStatus;
@@ -118,5 +119,19 @@ export const entriesApi = {
                 path: `/trips/${tripId}/entries`,
                 json: input,
             }),
+
+        attachMedia: (entryId: string, mediaId: string) =>
+            apiRequest({
+                baseUrl: BASE_URL!,
+                path: `/entries/${entryId}/media/${mediaId}`,
+                method: 'POST'
+            }),
+
+        removeMedia: (entryId: string, mediaId: string) =>
+            apiRequest({
+                baseUrl: BASE_URL!,
+                path: `/entries/${entryId}/media/${mediaId}`,
+                method: 'DELETE'
+            })
     },
 };
