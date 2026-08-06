@@ -18,6 +18,7 @@
   </Folder>
   <Folder Name="/docs/screenshots/">
     <File Path="aspire-dashboard.png" />
+    <File Path="frontend-media-upload.png" />
     <File Path="minio.png" />
     <File Path="saga-happy-path.jpg" />
   </Folder>
