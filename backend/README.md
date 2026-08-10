@@ -16,3 +16,6 @@ Format follows [Michael Nygard's template](https://cognitect.com/blog/2011/11/15
 | 007 | [Time injection in the Domain layer](ADR-007-time-injection.md)        | Accepted | 2026-06-21 |
 | 008 | [Result<T> pattern over thrown exceptions](ADR-008-result-pattern.md)  | Accepted | 2026-06-21 |
 | 009 | [ValidationBehavior throws instead of Result](ADR-009-validation-throws-instead-of-result.md) | Accepted | 2026-06-30 |
+| 010 | [Design-time DbContext factory for EF migrations under Aspire](ADR-010-design-time-dbcontext-factory.md) | Accepted | 2026-07-13 |
+| 011 | [In-memory domain event dispatch (outbox deferred)](ADR-011-in-memory-domain-event-dispatch.md) | Accepted | 2026-07-30 |
+| 012 | [Saga design — retention, idempotency, retry](ADR-012-saga-design.md) | Accepted | 2026-07-30 |

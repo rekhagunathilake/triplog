@@ -43,6 +43,9 @@ public sealed class PublishEntrySaga : MassTransitStateMachine<PublishEntrySagaS
 
         // Publishing: waiting for media-api to respond to each FinalizeMediaCommand
         During(Publishing,
+            // Sagas must be idempotent — retries and RabbitMQ redelivery can duplicate events.
+            // Ignore the "already started" case rather than throw NotAcceptedStateMachineException.
+            Ignore(EntryPublishBegan),
             When(MediaFinalized)
                 .Then(context => context.Saga.FinalizedCount++)
                 .IfElse(AllResponsesReceivedAndAllSucceeded,
@@ -79,6 +82,11 @@ public sealed class PublishEntrySaga : MassTransitStateMachine<PublishEntrySagaS
             })
             .ThenAsync(SendFinalizeCommandsAsync)
             .TransitionTo(Publishing));
+
+        During(Completed,
+            Ignore(EntryPublishBegan),
+            Ignore(MediaFinalized),
+            Ignore(MediaFinalizationFailed));
 
         // Remove saga row when it reaches a terminal state
         SetCompletedWhenFinalized();

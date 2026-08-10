@@ -62,6 +62,13 @@ public static class DependencyInjection
                 ?? throw new InvalidOperationException("Missing 'rabbitmq' connection string.");
 
                 cfg.Host(new Uri(rabbitConnectionString));
+
+                // Retry on transient DB errors (concurrent update, deadlock, or connectin blip)
+                cfg.UseMessageRetry(r =>
+                {
+                    r.Interval(5, TimeSpan.FromMilliseconds(200));
+                });
+
                 cfg.ConfigureEndpoints(context);
             });
         });

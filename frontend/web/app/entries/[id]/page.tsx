@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { entriesApi } from '@/lib/entries-api';
 import { ApiError } from '@/lib/api-error';
 import { MediaUpload } from './MediaUpload';
+import { EntryActions } from './EntryActions';
 
 export default async function EntryPage({
   params,
@@ -66,6 +67,8 @@ export default async function EntryPage({
             <MediaUpload entryId={entry.id} />
           </div>
         )}
+
+        <EntryActions entryId={entry.id} status={entry.status} />
       </section>
     </div>
   );
