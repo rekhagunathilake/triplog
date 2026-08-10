@@ -97,14 +97,14 @@ export const entriesApi = {
                 json: input,
             }),
 
-            activate: (id: string) =>
-                apiRequest({ baseUrl: BASE_URL!, path: `/trips/${id}/activate` , method: 'POST' }),
+        activate: (id: string) =>
+            apiRequest({ baseUrl: BASE_URL!, path: `/trips/${id}/activate` , method: 'POST' }),
 
-            complete: (id: string) =>
-                apiRequest({ baseUrl: BASE_URL!, path: `/trips/${id}/complete` , method: 'POST' }),
+        complete: (id: string) =>
+            apiRequest({ baseUrl: BASE_URL!, path: `/trips/${id}/complete` , method: 'POST' }),
 
-            archive: (id: string) =>
-                apiRequest({ baseUrl: BASE_URL!, path: `/trips/${id}/archive` , method: 'POST' }),
+        archive: (id: string) =>
+            apiRequest({ baseUrl: BASE_URL!, path: `/trips/${id}/archive` , method: 'POST' }),
     },
     entries: {
         listByTrip: (tripId: string) =>
@@ -132,6 +132,12 @@ export const entriesApi = {
                 baseUrl: BASE_URL!,
                 path: `/entries/${entryId}/media/${mediaId}`,
                 method: 'DELETE'
-            })
+            }),
+
+        publish: (id: string) =>
+            apiRequest({ baseUrl: BASE_URL!, path: `/entries/${id}/publish` , method: 'POST' }),
+
+        archive: (id: string) =>
+            apiRequest({ baseUrl: BASE_URL!, path: `/entries/${id}/archive` , method: 'POST' }),
     },
 };
