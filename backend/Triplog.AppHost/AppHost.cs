@@ -12,6 +12,7 @@ var rabbitmq = builder.AddRabbitMQ("rabbitmq")
 var redis = builder.AddRedis("redis");
 
 var minio = builder.AddContainer("minio", "minio/minio")
+    .WithEnvironment("MINIO_SERVER_URL", "http://localhost:9000")
     .WithEnvironment("MINIO_API_CORS_ALLOW_ORIGIN", "http://localhost:3000")
     .WithEndpoint(9000, 9000, name: "api", scheme: "http")
     .WithEndpoint(9001, 9001, name: "console", scheme: "http")

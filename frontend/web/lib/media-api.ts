@@ -16,6 +16,10 @@ export interface UploadUrlResponse {
     expiresAtUtc: string;
 }
 
+export interface url {
+    url: string;
+}
+
 // Client
 
 export const mediaApi = {
@@ -24,5 +28,11 @@ export const mediaApi = {
             baseUrl: BASE_URL!,
             path: `/media/upload-url`,
             json: input,
+        }),
+
+    getDownloadUrl: (mediaId: string) =>
+        apiRequest<url>({
+            baseUrl: BASE_URL!,
+            path: `/media/${mediaId}/download-url`,
         }),
 };
