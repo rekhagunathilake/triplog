@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { entriesApi, type EntrySummary } from "@/lib/entries-api";
 import { ApiError } from "@/lib/api-error";
 import { TripActions } from "./TripActions";
+import { getTripMediaUrls, type TripMediaItem } from "@/lib/trip-media";
 
 export default async function TripPage({
     params,
@@ -13,12 +14,15 @@ export default async function TripPage({
 
     let trip;
     let entries: EntrySummary[];
+    let galleryItems: TripMediaItem[];
 
     try {
-        [trip, entries] = await Promise.all([
+        [trip, entries, galleryItems] = await Promise.all([
             entriesApi.trips.getById(id),
-            entriesApi.entries.listByTrip(id)
+            entriesApi.entries.listByTrip(id),
+            await getTripMediaUrls(id)
         ]);
+
     } catch (error) {
         if (error instanceof ApiError && error.status === 404) {
             notFound();
@@ -27,7 +31,7 @@ export default async function TripPage({
     }
 
     return (
-        <div className="space=y-6">
+        <div className="space=y-8">
             <header className="flex items-start justify-between">
                 <div>
                     <h1 className="text-2xl font-semibold">{trip.title}</h1>
@@ -81,6 +85,34 @@ export default async function TripPage({
                     </ul>
                 )}
             </section>
+
+            {galleryItems.length > 0 &&  (
+                <section>
+                    <h2 className="mb-3 text-lg font-medium">
+                        Gallery <span className="text-sm font-normal text-neutral-500">({galleryItems.length})</span>
+                    </h2>
+                    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+                        {galleryItems.map(item => (
+                            <Link
+                            key={item.mediaId}
+                            href={`/entries/${item.entryId}`}
+                            className="group relative aspect-square overflow-hidden rounded-lg border bg-neutral-100"
+                            >
+                                <img
+                                    src={item.url}
+                                    alt={item.entryTitle}
+                                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                    loading="lazy"
+                                />
+                                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3 opacity-0 transition-opacity group-hover:opacity-100">
+                                    <p className="text-xs font-medium text-white">{item.entryTitle}</p>
+                                    <p className="text-xs text-white/80">{item.visitedOn}</p>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </section>
+            )}
         </div>
     );
 }
