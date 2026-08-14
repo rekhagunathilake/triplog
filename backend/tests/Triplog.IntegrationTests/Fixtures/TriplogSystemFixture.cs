@@ -34,6 +34,11 @@ public class TriplogSystemFixture : IAsyncLifetime
     public string MinioAccessKey => MinioUser;
     public string MinioSecretKey => MinioSecret;
 
+
+    // Exposed factories
+    public EntriesApiFactory Entries { get; private set; } = null!;
+    public MediaApiFactory Media { get; private set; } = null!;
+
     // Lifecycle
 
     public async Task InitializeAsync()
@@ -52,8 +57,10 @@ public class TriplogSystemFixture : IAsyncLifetime
         // Build per-database connection strings for the API factories to use
         EntriesConnectionString = WithDatabase(_postgres.GetConnectionString(), "entries");
         MediaConnectionString = WithDatabase(_postgres.GetConnectionString(), "media");
-    }
 
+        Entries = new EntriesApiFactory(this);
+        Media = new MediaApiFactory(this);
+    }
 
     public async Task DisposeAsync()
     {
