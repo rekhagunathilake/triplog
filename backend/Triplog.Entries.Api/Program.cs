@@ -66,7 +66,3 @@ app.MapTripEndpoints();
 app.MapEntryEndpoints();
 
 app.Run();
-
-
-// This enables WebApplicationFactory<Program> for integration tests
-public partial class Program { }
