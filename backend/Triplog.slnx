@@ -44,6 +44,7 @@
     <File Path="compose.local.yml" />
   </Folder>
   <Folder Name="/Tests/">
+    <Project Path="tests/Triplog.IntegrationTests/Triplog.IntegrationTests.csproj" />
     <Project Path="Triplog.Entries.Domain.UnitTests/Triplog.Entries.Domain.UnitTests.csproj" />
     <Project Path="Triplog.Media.Domain.UnitTests/Triplog.Media.Domain.UnitTests.csproj" />
   </Folder>
