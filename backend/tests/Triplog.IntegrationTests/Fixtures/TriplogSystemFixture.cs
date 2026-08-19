@@ -17,7 +17,7 @@ public class TriplogSystemFixture : IAsyncLifetime
         .Build();
 
     private readonly RabbitMqContainer _rabbitmq = new RabbitMqBuilder()
-        .WithImage("rabbitmq:3-management")
+        .WithImage("rabbitmq:3")
         .Build();
 
     private readonly MinioContainer _minio = new MinioBuilder()
