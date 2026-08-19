@@ -56,7 +56,7 @@ public class SagaHappyPathTests(TriplogSystemFixture triplogSystemFixture) :
         // 7. Poll until saga finishes (Published) or blows up (Failed)
         var finalEntry = await TestWait.ForAsync(
             fetch: () => entries.GetAsync<EntryBody>($"/entries/{entry.Id.Value}"),
-            predicate: e => e.Status is "Published" or "Failed",
+            predicate: e => e.Status == "Draft" || e.Status == "Published",
             timeout: TimeSpan.FromSeconds(15));
 
         finalEntry.Status.Should().Be("Published");

@@ -11,7 +11,7 @@ public class SagaFailurePathTests(TriplogSystemFixture fx) : IClassFixture<Tripl
     private ApiClient MediaApi() => new(fx.Media.CreateClient(), TestUserId);
 
     [Fact]
-    public async Task Publishing_Entry_When_Blob_Is_Missing_Transitions_To_Failed_And_Fails_Media()
+    public async Task Publishing_Entry_When_Blob_Is_Missing_Resets_To_Draft_And_Fails_Media()
     {
         var entries = EntriesApi();
         var media = MediaApi();
@@ -53,13 +53,13 @@ public class SagaFailurePathTests(TriplogSystemFixture fx) : IClassFixture<Tripl
         // 7. Poll until saga finishes (Published) or blows up (Failed)
         var finalEntry = await TestWait.ForAsync(
             fetch: () => entries.GetAsync<EntryBody>($"/entries/{entry.Id.Value}"),
-            predicate: e => e.Status is "Published" or "Failed",
+            predicate: e => (e.Status == "Draft" && e.LastPublishFailReason is not null)
+                 || e.Status == "Published",   // include for fast-fail if saga took wrong 
             timeout: TimeSpan.FromSeconds(15));
 
-        finalEntry.Status.Should().Be("Failed");
-        finalEntry.PublishedAtUtc.Should().BeNull(); 
-        finalEntry.LastPublishFailReason.Should().Contain(
-            "Blob not found", "the failure reason from media-api should propagate through the saga back to the entry");
+        finalEntry.Status.Should().Be("Draft", "the domain resets to Draft after a failed publish so the user can retry");
+        finalEntry.LastPublishFailReason.Should().Contain("Blob not found");
+        finalEntry.PublishedAtUtc.Should().BeNull();
 
         // 8. Media item should have been failed as part of the saga
         var mediaItem = await media.GetAsync<MediaItemBody>($"/media/{upload.MediaId}");
