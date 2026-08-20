@@ -172,6 +172,16 @@ entries-api exposes 17 endpoints — all wired through MediatR handlers with ser
 | POST | `/entries/{id}/publish/fail` | Saga-called: Publishing → Draft (compensation) |
 | POST | `/entries/{id}/archive` | Any non-Archived → Archived |
 
+### Media
+
+| Verb | Route | Purpose |
+|---|---|---|
+| POST | `/media/upload-url` | Reserve a slot (creates Provisional MediaItem) + return presigned upload URL |
+| GET | `/media/{id}` | Get media item metadata |
+| GET | `/media/{id}/download-url` | Get presigned URL for viewing |
+| POST | `/media/{id}/finalize` | Saga-called: Provisional → Finalized (verifies blob exists) |
+| POST | `/media/{id}/fail` | Saga-called: Provisional → Failed (compensation) |
+
 Every request requires the `X-User-Id: <guid>` header (v1 fake auth — see [ADR-006](backend/ADR-006-no-auth-v1.md)). Missing or invalid header → 401.
 
 ## Trying it out
