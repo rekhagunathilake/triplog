@@ -45,8 +45,8 @@
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="tests/Triplog.IntegrationTests/Triplog.IntegrationTests.csproj" />
-    <Project Path="Triplog.Entries.Domain.UnitTests/Triplog.Entries.Domain.UnitTests.csproj" />
-    <Project Path="Triplog.Media.Domain.UnitTests/Triplog.Media.Domain.UnitTests.csproj" />
+    <Project Path="tests/Triplog.Entries.Domain.UnitTests/Triplog.Entries.Domain.UnitTests.csproj" />
+    <Project Path="tests/Triplog.Media.Domain.UnitTests/Triplog.Media.Domain.UnitTests.csproj" />
   </Folder>
   <Project Path="Triplog.AppHost/Triplog.AppHost.csproj" />
   <Project Path="Triplog.ServiceDefaults/Triplog.ServiceDefaults.csproj" />

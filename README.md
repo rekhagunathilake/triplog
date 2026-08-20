@@ -4,7 +4,7 @@
 
 A two-service travel journal demonstrating .NET Aspire orchestration, MassTransit saga-based coordination, and Clean Architecture across bounded contexts — built deliberately small so every distributed system decision can be explained line by line.
 
-> **Status — v1 complete.** Full distributed saga runs end-to-end (entries-api → RabbitMQ → media-api → saga callback → entries-api). Next up: Next.js frontend, integration tests, and CI. v2 will add real auth and cloud deploy.
+> **Status — v1 complete.** Full distributed saga runs end-to-end (entries-api → RabbitMQ → media-api → saga callback → entries-api). v2 will add real auth and cloud deploy.
 
 ## What this demonstrates
 
@@ -172,6 +172,16 @@ entries-api exposes 17 endpoints — all wired through MediatR handlers with ser
 | POST | `/entries/{id}/publish/fail` | Saga-called: Publishing → Draft (compensation) |
 | POST | `/entries/{id}/archive` | Any non-Archived → Archived |
 
+### Media
+
+| Verb | Route | Purpose |
+|---|---|---|
+| POST | `/media/upload-url` | Reserve a slot (creates Provisional MediaItem) + return presigned upload URL |
+| GET | `/media/{id}` | Get media item metadata |
+| GET | `/media/{id}/download-url` | Get presigned URL for viewing |
+| POST | `/media/{id}/finalize` | Saga-called: Provisional → Finalized (verifies blob exists) |
+| POST | `/media/{id}/fail` | Saga-called: Provisional → Failed (compensation) |
+
 Every request requires the `X-User-Id: <guid>` header (v1 fake auth — see [ADR-006](backend/ADR-006-no-auth-v1.md)). Missing or invalid header → 401.
 
 ## Trying it out
@@ -191,6 +201,32 @@ Once Aspire is running (`dotnet run --project backend/Triplog.AppHost`):
 ![MinIO Bucket](backend/minio.png)
 ![Aspire Dashboard](backend/aspire-dashboard.png)
 
+## Testing
+
+Two layers of coverage — pure Domain tests and full-stack integration tests — both run in CI on every PR.
+
+### Domain unit tests
+
+Aggregates, value objects, and state-machine invariants have direct xUnit + FluentAssertions coverage under `Triplog.Entries.Domain.UnitTests` and `Triplog.Media.Domain.UnitTests`. Time is injected (see [ADR-007](backend/ADR-007-time-injection.md)) so every test is deterministic — no `DateTime.UtcNow` inside aggregates.
+
+### Integration tests
+
+`Triplog.IntegrationTests` boots both APIs in-process via `WebApplicationFactory<T>` against real containers spun up by [Testcontainers](https://testcontainers.com/) — Postgres 16, RabbitMQ 3, and MinIO. No mocks, no in-memory shims. What runs in the tests is what runs in production.
+
+The suite covers three axes:
+
+| Test class | What it proves |
+|---|---|
+| `TripCrudTests` | HTTP → MediatR → EF → Postgres round-trips work end-to-end; state transitions return correct status codes |
+| `SagaHappyPathTests` | Distributed publish flow: create trip → create entry → upload bytes → attach media → publish → saga finalizes media → entry reaches `Published` |
+| `SagaFailurePathTests` | Compensation path: publish without uploading the blob → media-api detects the missing object and fails → saga resets entry to `Draft` with `LastPublishFailReason` preserved (see [ADR-005](backend/ADR-005-saga-orchestration.md)) |
+
+The saga tests are the marquee — a single test method drives HTTP requests through both services, real RabbitMQ, real Postgres, and real MinIO to prove the whole distributed system converges to the expected end state.
+
+### CI
+
+Every PR to `main` runs backend build + all tests via `.github/workflows/backend-ci.yml`. Testcontainers uses the GitHub-hosted Ubuntu runner's pre-installed Docker daemon — no extra setup, no shared state between runs.
+
 ## Project layout
 
 ```
@@ -205,8 +241,15 @@ triplog/
 │   ├── Triplog.Entries.Domain/         Aggregates, VOs, domain events, strongly-typed IDs
 │   ├── Triplog.Entries.Infrastructure/ EF Core, Postgres, repositories, query projections
 │   │   └── Persistence/                DbContext, configurations, interceptors, UoW
-│   ├── Triplog.Media.{Api,...}/        (in progress)
-│   └── Triplog.{Entries,Media}.Domain.UnitTests/
+│   ├── Triplog.Media.Api/              Presigned upload URLs, saga-called finalize/fail
+│   ├── Triplog.Media.Application/      CQRS commands + queries + validators
+│   ├── Triplog.Media.Domain/           MediaItem aggregate, blob key VO, status state machine
+│   ├── Triplog.Media.Infrastructure/   EF Core, Postgres, MinIO adapter, MassTransit consumers
+│   │   └── Persistence/                DbContext, configurations, interceptors, UoW
+│   └── tests/
+│       ├── Triplog.Entries.Domain.UnitTests/
+│       ├── Triplog.Media.Domain.UnitTests/
+│       └── Triplog.IntegrationTests/   Testcontainers + WebApplicationFactory, saga end-to-end
 ├── frontend/
 │   └── web/                            Next.js 15, Tailwind, shadcn/ui
 └── docs/
