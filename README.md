@@ -4,7 +4,7 @@
 
 A two-service travel journal demonstrating .NET Aspire orchestration, MassTransit saga-based coordination, and Clean Architecture across bounded contexts — built deliberately small so every distributed system decision can be explained line by line.
 
-> **Status — v1 complete.** Full distributed saga runs end-to-end (entries-api → RabbitMQ → media-api → saga callback → entries-api). Next up: Next.js frontend, integration tests, and CI. v2 will add real auth and cloud deploy.
+> **Status — v1 complete.** Full distributed saga runs end-to-end (entries-api → RabbitMQ → media-api → saga callback → entries-api). v2 will add real auth and cloud deploy.
 
 ## What this demonstrates
 
