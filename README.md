@@ -201,6 +201,32 @@ Once Aspire is running (`dotnet run --project backend/Triplog.AppHost`):
 ![MinIO Bucket](backend/minio.png)
 ![Aspire Dashboard](backend/aspire-dashboard.png)
 
+## Testing
+
+Two layers of coverage — pure Domain tests and full-stack integration tests — both run in CI on every PR.
+
+### Domain unit tests
+
+Aggregates, value objects, and state-machine invariants have direct xUnit + FluentAssertions coverage under `Triplog.Entries.Domain.UnitTests` and `Triplog.Media.Domain.UnitTests`. Time is injected (see [ADR-007](backend/ADR-007-time-injection.md)) so every test is deterministic — no `DateTime.UtcNow` inside aggregates.
+
+### Integration tests
+
+`Triplog.IntegrationTests` boots both APIs in-process via `WebApplicationFactory<T>` against real containers spun up by [Testcontainers](https://testcontainers.com/) — Postgres 16, RabbitMQ 3, and MinIO. No mocks, no in-memory shims. What runs in the tests is what runs in production.
+
+The suite covers three axes:
+
+| Test class | What it proves |
+|---|---|
+| `TripCrudTests` | HTTP → MediatR → EF → Postgres round-trips work end-to-end; state transitions return correct status codes |
+| `SagaHappyPathTests` | Distributed publish flow: create trip → create entry → upload bytes → attach media → publish → saga finalizes media → entry reaches `Published` |
+| `SagaFailurePathTests` | Compensation path: publish without uploading the blob → media-api detects the missing object and fails → saga resets entry to `Draft` with `LastPublishFailReason` preserved (see [ADR-005](backend/ADR-005-saga-orchestration.md)) |
+
+The saga tests are the marquee — a single test method drives HTTP requests through both services, real RabbitMQ, real Postgres, and real MinIO to prove the whole distributed system converges to the expected end state.
+
+### CI
+
+Every PR to `main` runs backend build + all tests via `.github/workflows/backend-ci.yml`. Testcontainers uses the GitHub-hosted Ubuntu runner's pre-installed Docker daemon — no extra setup, no shared state between runs.
+
 ## Project layout
 
 ```
