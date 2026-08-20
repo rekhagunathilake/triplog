@@ -241,8 +241,15 @@ triplog/
 │   ├── Triplog.Entries.Domain/         Aggregates, VOs, domain events, strongly-typed IDs
 │   ├── Triplog.Entries.Infrastructure/ EF Core, Postgres, repositories, query projections
 │   │   └── Persistence/                DbContext, configurations, interceptors, UoW
-│   ├── Triplog.Media.{Api,...}/        (in progress)
-│   └── Triplog.{Entries,Media}.Domain.UnitTests/
+│   ├── Triplog.Media.Api/              Presigned upload URLs, saga-called finalize/fail
+│   ├── Triplog.Media.Application/      CQRS commands + queries + validators
+│   ├── Triplog.Media.Domain/           MediaItem aggregate, blob key VO, status state machine
+│   ├── Triplog.Media.Infrastructure/   EF Core, Postgres, MinIO adapter, MassTransit consumers
+│   │   └── Persistence/                DbContext, configurations, interceptors, UoW
+│   └── tests/
+│       ├── Triplog.Entries.Domain.UnitTests/
+│       ├── Triplog.Media.Domain.UnitTests/
+│       └── Triplog.IntegrationTests/   Testcontainers + WebApplicationFactory, saga end-to-end
 ├── frontend/
 │   └── web/                            Next.js 15, Tailwind, shadcn/ui
 └── docs/
