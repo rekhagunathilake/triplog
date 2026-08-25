@@ -30,7 +30,7 @@ export default function NewTripPage() {
                 startDate,
                 endDate,
             });
-            router.push(`/trips/${id}`);
+            router.push(`/trips/${id.value}`);
         } catch (error) {
             if (error instanceof ApiError) {
                 if (error.problem.errors) {

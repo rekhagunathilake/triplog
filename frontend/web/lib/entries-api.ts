@@ -91,7 +91,7 @@ export const entriesApi = {
             apiRequest<Trip>({ baseUrl: BASE_URL!, path: `/trips/${id}` }),
 
         create: (input: CreateTripInput) =>
-            apiRequest<{ id: string }>({
+            apiRequest<{ id: { value: string } }>({
                 baseUrl: BASE_URL!,
                 path: '/trips',
                 json: input,
@@ -114,7 +114,7 @@ export const entriesApi = {
             apiRequest<Entry>({ baseUrl: BASE_URL!, path: `/entries/${id}` }),
 
         create: (tripId: string, input: CreateEntryInput) =>
-            apiRequest<{ id: string }>({
+            apiRequest<{ id: { value: string } }>({
                 baseUrl: BASE_URL!,
                 path: `/trips/${tripId}/entries`,
                 json: input,
