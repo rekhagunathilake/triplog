@@ -26,7 +26,7 @@ public class SagaFailurePathTests(TriplogSystemFixture fx) : IClassFixture<Tripl
 
         // 2. Draft entry under that trip
         var entry = await entries.PostAsync<CreatedResponse>(
-            $"/trips/{trip.Id.Value}/entries",
+            $"/trips/{trip.Id}/entries",
             new
             {
                 title = "Day 1",
@@ -45,14 +45,14 @@ public class SagaFailurePathTests(TriplogSystemFixture fx) : IClassFixture<Tripl
         // 4. Skip uploading real media.
 
         // 5. Attach the media reference to the entry
-        await entries.PostVoidAsync($"/entries/{entry.Id.Value}/media/{upload.MediaId}");
+        await entries.PostVoidAsync($"/entries/{entry.Id}/media/{upload.MediaId}");
 
         // 6. Kick off the saga
-        await entries.PostVoidAsync($"/entries/{entry.Id.Value}/publish");
+        await entries.PostVoidAsync($"/entries/{entry.Id}/publish");
 
         // 7. Poll until saga finishes (Published) or blows up (Failed)
         var finalEntry = await TestWait.ForAsync(
-            fetch: () => entries.GetAsync<EntryBody>($"/entries/{entry.Id.Value}"),
+            fetch: () => entries.GetAsync<EntryBody>($"/entries/{entry.Id}"),
             predicate: e => (e.Status == "Draft" && e.LastPublishFailReason is not null)
                  || e.Status == "Published",   // include for fast-fail if saga took wrong 
             timeout: TimeSpan.FromSeconds(15));
@@ -67,8 +67,7 @@ public class SagaFailurePathTests(TriplogSystemFixture fx) : IClassFixture<Tripl
     }
 
     // Test-local DTOs matching wire shapes
-    private record CreatedResponse(IdBody Id);
-    private record IdBody(Guid Value);
+    private record CreatedResponse(Guid Id);
 
     private record UploadUrlBody(Guid MediaId);
 

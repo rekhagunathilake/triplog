@@ -6,6 +6,7 @@ using Triplog.Entries.Api.Endpoints;
 using Triplog.Entries.Api.Http;
 using Triplog.Entries.Application.Abstractions;
 using Triplog.Entries.Infrastructure.Persistence;
+using Triplog.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,7 @@ builder.Services.AddCors(options =>
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    options.SerializerOptions.Converters.Add(new StronglyTypedIdConverterFactory());
 });
 
 var app = builder.Build();

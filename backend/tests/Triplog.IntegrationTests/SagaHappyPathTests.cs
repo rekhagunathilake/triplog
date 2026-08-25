@@ -28,7 +28,7 @@ public class SagaHappyPathTests(TriplogSystemFixture triplogSystemFixture) :
 
         // 2. Draft entry under that trip
         var entry = await entries.PostAsync<CreatedResponse>(
-            $"/trips/{trip.Id.Value}/entries",
+            $"/trips/{trip.Id}/entries",
             new
             {
                 title = "Day 1",
@@ -48,14 +48,14 @@ public class SagaHappyPathTests(TriplogSystemFixture triplogSystemFixture) :
         await UploadBytesAsync(upload.UploadUrl, "test-jpeg!!!"u8.ToArray(), "image/jpeg");
 
         // 5. Attach the media reference to the entry
-        await entries.PostVoidAsync($"/entries/{entry.Id.Value}/media/{upload.MediaId}");
+        await entries.PostVoidAsync($"/entries/{entry.Id}/media/{upload.MediaId}");
 
         // 6. Kick off the saga
-        await entries.PostVoidAsync($"/entries/{entry.Id.Value}/publish");
+        await entries.PostVoidAsync($"/entries/{entry.Id}/publish");
 
         // 7. Poll until saga finishes (Published) or blows up (Failed)
         var finalEntry = await TestWait.ForAsync(
-            fetch: () => entries.GetAsync<EntryBody>($"/entries/{entry.Id.Value}"),
+            fetch: () => entries.GetAsync<EntryBody>($"/entries/{entry.Id}"),
             predicate: e => e.Status == "Draft" || e.Status == "Published",
             timeout: TimeSpan.FromSeconds(15));
 
@@ -77,8 +77,7 @@ public class SagaHappyPathTests(TriplogSystemFixture triplogSystemFixture) :
     }
 
     // Test-local DTOs matching wire shapes
-    private record CreatedResponse(IdBody Id);
-    private record IdBody(Guid Value);
+    private record CreatedResponse(Guid Id);
 
     private record UploadUrlBody(Guid MediaId, string UploadUrl, DateTime ExpiresAtUtc);
 
