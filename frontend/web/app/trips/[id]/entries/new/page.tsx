@@ -50,7 +50,7 @@ export default function NewEntryPage({
                 latitude: hasFullLocation ? Number(latitude) : undefined,
                 longitude: hasFullLocation ? Number(longitude) : undefined,
             });
-            router.push(`/entries/${id.value}`);
+            router.push(`/entries/${id}`);
         }
         catch (error) {
             if (error instanceof ApiError) {
