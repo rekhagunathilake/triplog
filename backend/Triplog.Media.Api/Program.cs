@@ -9,6 +9,7 @@ using Triplog.Media.Api.Http;
 using Triplog.Media.Application;
 using Triplog.Media.Application.Abstractions;
 using Triplog.Media.Infrastructure;
+using Triplog.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +40,7 @@ builder.Services.AddCors(options =>
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    options.SerializerOptions.Converters.Add(new StronglyTypedIdConverterFactory());
 });
 
 var app = builder.Build();

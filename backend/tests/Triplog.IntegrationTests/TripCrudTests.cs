@@ -41,7 +41,7 @@ public class TripCrudTests(TriplogSystemFixture triplogSystemFixture) : IClassFi
 
         var trips = await api.GetAsync<List<TripSummary>>("/trips");
 
-        trips.Should().Contain(t => t.Id == created.Id.Value && t.Title == "Japan 2027");
+        trips.Should().Contain(t => t.Id == created.Id && t.Title == "Japan 2027");
     }
 
     [Fact]
@@ -56,7 +56,7 @@ public class TripCrudTests(TriplogSystemFixture triplogSystemFixture) : IClassFi
             endDate = "2026-06-10",
         });
 
-        var trip = await api.GetAsync<TripDetail>($"/trips/{created.Id.Value}");
+        var trip = await api.GetAsync<TripDetail>($"/trips/{created.Id}");
 
         trip.Title.Should().Be("Norway 2026");
         trip.Status.Should().Be("Planning");
@@ -74,12 +74,12 @@ public class TripCrudTests(TriplogSystemFixture triplogSystemFixture) : IClassFi
             endDate = "2026-09-10",
         });
 
-        await api.PostVoidAsync($"/trips/{created.Id.Value}/activate");
-        var afterActivate = await api.GetAsync<TripDetail>($"/trips/{created.Id.Value}");
+        await api.PostVoidAsync($"/trips/{created.Id}/activate");
+        var afterActivate = await api.GetAsync<TripDetail>($"/trips/{created.Id}");
         afterActivate.Status.Should().Be("Active");
 
-        await api.PostVoidAsync($"/trips/{created.Id.Value}/complete");
-        var afterComplete = await api.GetAsync<TripDetail>($"/trips/{created.Id.Value}");
+        await api.PostVoidAsync($"/trips/{created.Id}/complete");
+        var afterComplete = await api.GetAsync<TripDetail>($"/trips/{created.Id}");
         afterComplete.Status.Should().Be("Completed");
     }
 
@@ -94,19 +94,18 @@ public class TripCrudTests(TriplogSystemFixture triplogSystemFixture) : IClassFi
             endDate = "2026-10-10",
         });
 
-        await api.PostVoidAsync($"/trips/{created.Id.Value}/activate");
-        await api.PostVoidAsync($"/trips/{created.Id.Value}/complete");
+        await api.PostVoidAsync($"/trips/{created.Id}/activate");
+        await api.PostVoidAsync($"/trips/{created.Id}/complete");
 
         // Try to activate again — should conflict
-        var response = await api.PostRawAsync($"/trips/{created.Id.Value}/activate");
+        var response = await api.PostRawAsync($"/trips/{created.Id}/activate");
 
         response.StatusCode.Should().Be(HttpStatusCode.Conflict);
     }
 
     // Local DTOs for JSON deserialization
 
-    private record CreatedResponse(TripIdBody Id);
-    private record TripIdBody(Guid Value);
+    private record CreatedResponse(Guid Id);
     private record TripSummary(Guid Id, string Title, string StartDate, string EndDate, string Status);
     private record TripDetail(Guid Id, string Title, string? Description, string StartDate, string EndDate, string Status);
 }
