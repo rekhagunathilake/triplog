@@ -7,6 +7,7 @@ using Triplog.Media.Application.MediaItems.Commands.FinalizeMediaItem;
 using Triplog.Media.Application.MediaItems.Queries.GetMediaItemById;
 using Triplog.Media.Application.MediaItems.Queries.ListMediaItemsByOwner;
 using Triplog.Media.Domain.MediaItems;
+using Triplog.ServiceDefaults;
 
 namespace Triplog.Media.Api.Endpoints;
 
@@ -46,7 +47,8 @@ public static class MediaEndpoints
                     UploadUrl: presigned.Url,
                     ExpiresAtUtc: presigned.ExpiresAtUtc
                     ));
-        });
+        })
+        .RequireAuthorization(AuthExtensions.OwnerPolicy);
 
         // Get metadata by id
         group.MapGet("/{id:guid}", async (
