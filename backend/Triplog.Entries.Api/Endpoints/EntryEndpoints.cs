@@ -14,6 +14,7 @@ using Triplog.Entries.Application.Entries.Queries.GetEntryById;
 using Triplog.Entries.Application.Entries.Queries.ListEntriesByTrip;
 using Triplog.Entries.Domain.Entries;
 using Triplog.Entries.Domain.Trips;
+using Triplog.ServiceDefaults;
 
 namespace Triplog.Entries.Api.Endpoints;
 
@@ -31,7 +32,8 @@ public static class EntryEndpoints
                 new EntryId(id), user.UserId, req.Title, req.Body, req.VisitedOn,
                 req.LocationName, req.Latitude, req.Longitude), ct);
             return result.ToNoContentResult();
-        });
+        })
+        .RequireAuthorization(AuthExtensions.OwnerPolicy);
 
         entries.MapPost("/{id:guid}/media/{mediaId:guid}", async (
             Guid id, Guid mediaId, ICurrentUser user, ISender sender, CancellationToken ct) =>
@@ -39,7 +41,8 @@ public static class EntryEndpoints
             var result = await sender.Send(new AttachMediaCommand(
                 new EntryId(id), user.UserId, new MediaReferenceId(mediaId)), ct);
             return result.ToNoContentResult();
-        });
+        })
+        .RequireAuthorization(AuthExtensions.OwnerPolicy);
 
         entries.MapDelete("/{id:guid}/media/{mediaId:guid}", async (
             Guid id, Guid mediaId, ICurrentUser user, ISender sender, CancellationToken ct) =>
@@ -47,14 +50,16 @@ public static class EntryEndpoints
             var result = await sender.Send(new RemoveMediaCommand(
                 new EntryId(id), user.UserId, new MediaReferenceId(mediaId)), ct);
             return result.ToNoContentResult();
-        });
+        })
+        .RequireAuthorization(AuthExtensions.OwnerPolicy);
 
         entries.MapPost("/{id:guid}/publish", async (
             Guid id, ICurrentUser user, ISender sender, CancellationToken ct) =>
         {
             var result = await sender.Send(new PublishEntryCommand(new EntryId(id), user.UserId), ct);
             return result.ToNoContentResult();
-        });
+        })
+        .RequireAuthorization(AuthExtensions.OwnerPolicy);
 
         // Saga-called endpoints — no OwnerId (internal caller)
         entries.MapPost("/{id:guid}/publish/complete", async (
@@ -76,7 +81,8 @@ public static class EntryEndpoints
         {
             var result = await sender.Send(new ArchiveEntryCommand(new EntryId(id), user.UserId), ct);
             return result.ToNoContentResult();
-        });
+        })
+        .RequireAuthorization(AuthExtensions.OwnerPolicy);
 
         entries.MapGet("/{id:guid}", async (
             Guid id, ICurrentUser user, ISender sender, CancellationToken ct) =>
@@ -95,7 +101,8 @@ public static class EntryEndpoints
                 new TripId(tripId), user.UserId, req.Title, req.Body, req.VisitedOn,
                 req.LocationName, req.Latitude, req.Longitude), ct);
             return result.ToCreatedResult(id => $"/entries/{id.Value}");
-        });
+        })
+        .RequireAuthorization(AuthExtensions.OwnerPolicy);
 
         tripEntries.MapGet("/", async (
             Guid tripId, ICurrentUser user, ISender sender, CancellationToken ct) =>
