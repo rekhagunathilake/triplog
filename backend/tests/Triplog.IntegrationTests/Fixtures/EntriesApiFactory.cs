@@ -16,7 +16,10 @@ public class EntriesApiFactory(TriplogSystemFixture triplogSystemFixture) : WebA
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["ConnectionStrings:entries"] = triplogSystemFixture.EntriesConnectionString,
-                ["ConnectionStrings:rabbitmq"] = triplogSystemFixture.RabbitMqConnectionString
+                ["ConnectionStrings:rabbitmq"] = triplogSystemFixture.RabbitMqConnectionString,
+                ["Auth:JwtSecret"] = triplogSystemFixture.JwtSecret,
+                ["Auth:OwnerEmail"] = triplogSystemFixture.OwnerEmail,
+                ["Auth:PublicOwnerId"] = triplogSystemFixture.PublicOwnerId.ToString(),
             });
         });
     }

@@ -3,12 +3,15 @@ using Triplog.IntegrationTests.Fixtures;
 
 namespace Triplog.IntegrationTests;
 
-public class SagaFailurePathTests(TriplogSystemFixture fx) : IClassFixture<TriplogSystemFixture>
+public class SagaFailurePathTests(TriplogSystemFixture triplogSystemFixture) : IClassFixture<TriplogSystemFixture>
 {
-    private static readonly Guid TestUserId = Guid.Parse("33333333-3333-3333-3333-333333333333");
-
-    private ApiClient EntriesApi() => new(fx.Entries.CreateClient(), TestUserId);
-    private ApiClient MediaApi() => new(fx.Media.CreateClient(), TestUserId);
+    private ApiClient EntriesApi() => new(
+        triplogSystemFixture.Entries.CreateClient(), 
+        TestJwt.ForEmail(triplogSystemFixture.OwnerEmail, triplogSystemFixture.JwtSecret));
+    
+    private ApiClient MediaApi() => new(
+        triplogSystemFixture.Media.CreateClient(),
+        TestJwt.ForEmail(triplogSystemFixture.OwnerEmail, triplogSystemFixture.JwtSecret));
 
     [Fact]
     public async Task Publishing_Entry_When_Blob_Is_Missing_Resets_To_Draft_And_Fails_Media()

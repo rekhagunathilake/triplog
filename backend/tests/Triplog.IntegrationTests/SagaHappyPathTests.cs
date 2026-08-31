@@ -7,10 +7,13 @@ namespace Triplog.IntegrationTests;
 public class SagaHappyPathTests(TriplogSystemFixture triplogSystemFixture) :
     IClassFixture<TriplogSystemFixture>
 {
-    private static readonly Guid TestUserId = Guid.Parse("22222222-2222-2222-2222-222222222222");
-
-    private ApiClient EntriesApi() => new(triplogSystemFixture.Entries.CreateClient(), TestUserId);
-    private ApiClient MediaApi() => new(triplogSystemFixture.Media.CreateClient(), TestUserId);
+    private ApiClient EntriesApi() => new(
+        triplogSystemFixture.Entries.CreateClient(),
+        TestJwt.ForEmail(triplogSystemFixture.OwnerEmail, triplogSystemFixture.JwtSecret));
+    
+    private ApiClient MediaApi() => new(
+        triplogSystemFixture.Media.CreateClient(),
+        TestJwt.ForEmail(triplogSystemFixture.OwnerEmail, triplogSystemFixture.JwtSecret));
 
     [Fact]
     public async Task Publishing_Entry_With_Media_Transitions_To_Published_And_Finalizes_Media()
