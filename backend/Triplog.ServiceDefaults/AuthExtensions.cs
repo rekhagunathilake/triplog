@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -11,14 +12,20 @@ public static class AuthExtensions
 {
     public const string OwnerPolicy = "OwnerOnly";
 
-    public static IServiceCollection AddTriplogAuth(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddTriplogAuth(this IServiceCollection services)
     {
-        var secret = configuration["Auth:JwtSecret"] ?? throw new InvalidOperationException("Missing Auth:JwtSecret");
-        var ownerEmail = configuration["Auth:OwnerEmail"] ?? throw new InvalidOperationException("Missing Auth:OwnerEmail");
-
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
+            .AddJwtBearer();
+
+        // Late-bind JqtBearer options: read config at resolve time, not DI-registration time.
+        // Fixes WebApplicationFactory's InMemory overrides being applied too late.
+        services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+            .Configure<IConfiguration>((options, configuration) =>
             {
+                var secret = configuration["Auth:JwtSecret"] ??
+                    throw new InvalidOperationException("Missing Auth:JwtSecret");
+                //var ownerEmail = configuration["Auth:OwnerEmail"] ?? throw new InvalidOperationException("Missing Auth:OwnerEmail");
+
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
@@ -30,18 +37,31 @@ public static class AuthExtensions
                 };
             });
 
-        services.AddAuthorization(options => {
+        services.AddAuthorization(options =>
             options.AddPolicy(OwnerPolicy, policy =>
-            {
-                policy.RequireAssertion(ctx =>
-                {
-                    var email = ctx.User.FindFirst(ClaimTypes.Email)?.Value ??
-                        ctx.User.FindFirst("email")?.Value;
-                    return string.Equals(email, ownerEmail, StringComparison.OrdinalIgnoreCase);
-                });
-            });
-        });
+                policy.AddRequirements(new OwnerRequirement())));
+
+        services.AddSingleton<IAuthorizationHandler, OwnerHandler>();
 
         return services;
+    }
+}
+
+public sealed class OwnerRequirement : IAuthorizationRequirement { }
+
+public sealed class OwnerHandler(IConfiguration configuration)
+    : AuthorizationHandler<OwnerRequirement>
+{
+    protected override Task HandleRequirementAsync(
+        AuthorizationHandlerContext context, OwnerRequirement requirement)
+    {
+        var ownerEmail = configuration["Auth:OwnerEmail"];
+        var email = context.User.FindFirst(ClaimTypes.Email)?.Value
+                 ?? context.User.FindFirst("email")?.Value;
+
+        if (string.Equals(email, ownerEmail, StringComparison.OrdinalIgnoreCase))
+            context.Succeed(requirement);
+
+        return Task.CompletedTask;
     }
 }

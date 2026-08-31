@@ -21,7 +21,7 @@ builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, ConfiguredOwnerCurrentUser>();
 
-builder.Services.AddTriplogAuth(builder.Configuration);
+builder.Services.AddTriplogAuth();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 
