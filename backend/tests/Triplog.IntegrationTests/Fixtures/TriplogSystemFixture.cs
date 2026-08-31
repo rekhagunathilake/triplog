@@ -34,6 +34,11 @@ public class TriplogSystemFixture : IAsyncLifetime
     public string MinioAccessKey => MinioUser;
     public string MinioSecretKey => MinioSecret;
 
+    // Test auth config — shared with both API factories and every ApiClient
+    public string JwtSecret => "test-jwt-secret-at-least-32-bytes-long-for-hs256!!";
+    public string OwnerEmail => "test-owner@triplog.local";
+    public Guid PublicOwnerId { get; } = Guid.Parse("99999999-9999-9999-9999-999999999999");
+
 
     // Exposed factories
     public EntriesApiFactory Entries { get; private set; } = null!;

@@ -12,8 +12,6 @@ public sealed class ValidationExceptionHandler : IExceptionHandler
         var problem = exception switch
         {
             ValidationException v => BuildValidationProblem(v),
-            MissingUserHeaderException m => BuildAuthProblem(m.Message),
-            InvalidUserHeaderException i => BuildAuthProblem(i.Message),
             _ => (ProblemDetails?)null
         };
 

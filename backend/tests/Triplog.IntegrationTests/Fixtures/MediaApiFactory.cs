@@ -20,6 +20,9 @@ public class MediaApiFactory(TriplogSystemFixture triplogSystemFixture) : WebApp
                 ["Minio:Endpoint"] = triplogSystemFixture.MinioEndpoint,
                 ["Minio:RootUser"] = triplogSystemFixture.MinioAccessKey,
                 ["Minio:RootPassword"] = triplogSystemFixture.MinioSecretKey,
+                ["Auth:JwtSecret"] = triplogSystemFixture.JwtSecret,
+                ["Auth:OwnerEmail"] = triplogSystemFixture.OwnerEmail,
+                ["Auth:PublicOwnerId"] = triplogSystemFixture.PublicOwnerId.ToString(),
             });
         });
     }

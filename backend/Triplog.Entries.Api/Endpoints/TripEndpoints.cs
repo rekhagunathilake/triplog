@@ -10,6 +10,7 @@ using Triplog.Entries.Application.Trips.Commands.UpdateTripDetails;
 using Triplog.Entries.Application.Trips.Queries.GetTripById;
 using Triplog.Entries.Application.Trips.Queries.ListTripsByOwner;
 using Triplog.Entries.Domain.Trips;
+using Triplog.ServiceDefaults;
 
 namespace Triplog.Entries.Api.Endpoints;
 
@@ -25,7 +26,8 @@ public static class TripEndpoints
             var result = await sender.Send(new CreateTripCommand(currentUser.UserId, request.Title, request.Description, request.StartDate, request.EndDate), ct);
 
             return result.ToCreatedResult(id => $"/trips/{id.Value}");
-        });
+        })
+        .RequireAuthorization(AuthExtensions.OwnerPolicy);
 
         group.MapPut("/{id:guid}", async (
             Guid id, UpdateTripDetailsRequest request, ICurrentUser currentUser, ISender sender, CancellationToken ct) =>
@@ -33,28 +35,32 @@ public static class TripEndpoints
             var result = await sender.Send(new UpdateTripDetailsCommand(new TripId(id), currentUser.UserId, request.Title, request.Description, request.StartDate, request.EndDate), ct);
 
             return result.ToNoContentResult();
-        });
+        })
+        .RequireAuthorization(AuthExtensions.OwnerPolicy);
 
         group.MapPost("/{id:guid}/activate", async (
             Guid id, ICurrentUser user, ISender sender, CancellationToken ct) =>
         {
             var result = await sender.Send(new ActivateTripCommand(new TripId(id), user.UserId), ct);
             return result.ToNoContentResult();
-        });
+        })
+        .RequireAuthorization(AuthExtensions.OwnerPolicy);
 
         group.MapPost("/{id:guid}/complete", async (
             Guid id, ICurrentUser user, ISender sender, CancellationToken ct) =>
         {
             var result = await sender.Send(new CompleteTripCommand(new TripId(id), user.UserId), ct);
             return result.ToNoContentResult();
-        });
+        })
+        .RequireAuthorization(AuthExtensions.OwnerPolicy);
 
         group.MapPost("/{id:guid}/archive", async (
             Guid id, ICurrentUser user, ISender sender, CancellationToken ct) =>
         {
             var result = await sender.Send(new ArchiveTripCommand(new TripId(id), user.UserId), ct);
             return result.ToNoContentResult();
-        });
+        })
+        .RequireAuthorization(AuthExtensions.OwnerPolicy);
 
         group.MapGet("/{id:guid}", async (
             Guid id, ICurrentUser user, ISender sender, CancellationToken ct) =>

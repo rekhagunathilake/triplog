@@ -6,9 +6,9 @@ namespace Triplog.IntegrationTests;
 
 public class TripCrudTests(TriplogSystemFixture triplogSystemFixture) : IClassFixture<TriplogSystemFixture>
 {
-    private static readonly Guid TestUserId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-
-    private ApiClient CreateApi() => new(triplogSystemFixture.Entries.CreateClient(), TestUserId);
+    private ApiClient CreateApi() => new(
+        triplogSystemFixture.Entries.CreateClient(),
+        TestJwt.ForEmail(triplogSystemFixture.OwnerEmail, triplogSystemFixture.JwtSecret));
 
     [Fact]
     public async Task Create_Trip_Returns_201_With_Id()
