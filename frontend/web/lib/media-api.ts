@@ -23,11 +23,12 @@ export interface url {
 // Client
 
 export const mediaApi = {
-    requestUploadUrl: (input: RequestUploadUrlInput) =>
+    requestUploadUrl: (input: RequestUploadUrlInput, token: string) =>
         apiRequest<UploadUrlResponse>({
             baseUrl: BASE_URL!,
             path: `/media/upload-url`,
             json: input,
+            token,
         }),
 
     getDownloadUrl: (mediaId: string) =>
