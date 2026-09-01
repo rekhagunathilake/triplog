@@ -2,11 +2,13 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { entriesApi } from '@/lib/entries-api';
 import { ApiError } from '@/lib/api-error';
 
 export default function NewTripPage() {
     const router = useRouter();
+    const { data: session } = useSession();
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -19,17 +21,25 @@ export default function NewTripPage() {
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        if (!session?.apiToken) {
+            setError('You must be signed in to create a trip.');
+            return;
+        }
+
         setSubmitting(true);
         setError(null);
         setFieldErrors({});
 
         try {
-            const { id } = await entriesApi.trips.create({
-                title,
-                description: description || undefined,
-                startDate,
-                endDate,
-            });
+            const { id } = await entriesApi.trips.create(
+                {
+                    title,
+                    description: description || undefined,
+                    startDate,
+                    endDate,
+                },
+                session.apiToken 
+            );
             router.push(`/trips/${id}`);
         } catch (error) {
             if (error instanceof ApiError) {

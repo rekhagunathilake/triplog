@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent, use } from 'react';
+import { useSession } from 'next-auth/react';
 import { entriesApi } from '@/lib/entries-api';
 import { ApiError } from '@/lib/api-error';
 
@@ -12,6 +13,7 @@ export default function NewEntryPage({
 }) {
     const { id: tripId } = use(params);
     const router = useRouter();
+    const { data: session } = useSession();
 
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
@@ -28,6 +30,10 @@ export default function NewEntryPage({
 
     async function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
+        if (!session?.apiToken) {
+            setError('You must be signed in to create an entry.');
+            return;
+        }
         setSubmitting(false);
         setError(null);
         setFieldErrors({});
@@ -49,7 +55,7 @@ export default function NewEntryPage({
                 locationName: hasFullLocation ? locationName : undefined,
                 latitude: hasFullLocation ? Number(latitude) : undefined,
                 longitude: hasFullLocation ? Number(longitude) : undefined,
-            });
+            }, session.apiToken);
             router.push(`/entries/${id}`);
         }
         catch (error) {
