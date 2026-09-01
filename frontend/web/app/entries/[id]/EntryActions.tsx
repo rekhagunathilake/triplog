@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { entriesApi, type EntryStatus } from '@/lib/entries-api';
 import { ApiError } from '@/lib/api-error';
 
@@ -17,6 +18,7 @@ export function EntryActions({
     const router = useRouter();
     const [pending, startTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);
+    const { data: session } = useSession();
 
     // Auto-refresh while the saga runs
     useEffect(() => {
@@ -30,11 +32,16 @@ export function EntryActions({
     }, [status, router]);
 
     async function runAction(action: Action) {
-            setError(null);           
-                   
-            try { 
-                if (action === 'publish') entriesApi.entries.publish(entryId);
-                else if (action === 'archive') entriesApi.entries.archive(entryId);
+            if (!session?.apiToken) {
+                setError('You must be signed in to perform this action.');
+                return;
+            }
+
+            setError(null);
+
+            try {
+                if (action === 'publish') entriesApi.entries.publish(entryId, session.apiToken);
+                else if (action === 'archive') entriesApi.entries.archive(entryId, session.apiToken);
 
                 startTransition(() => {
                 router.refresh();

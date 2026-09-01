@@ -90,21 +90,21 @@ export const entriesApi = {
         getById: (id: string) =>
             apiRequest<Trip>({ baseUrl: BASE_URL!, path: `/trips/${id}` }),
 
-        create: (input: CreateTripInput) =>
+        create: (input: CreateTripInput, token: string) =>
             apiRequest<{ id: string }>({
                 baseUrl: BASE_URL!,
                 path: '/trips',
                 json: input,
+                token,
             }),
 
-        activate: (id: string) =>
-            apiRequest({ baseUrl: BASE_URL!, path: `/trips/${id}/activate` , method: 'POST' }),
+        activate: (id: string, token: string) =>
+            apiRequest({ baseUrl: BASE_URL!, path: `/trips/${id}/activate` , method: 'POST', token }),
+        complete: (id: string, token: string) =>
+            apiRequest({ baseUrl: BASE_URL!, path: `/trips/${id}/complete` , method: 'POST', token }),
 
-        complete: (id: string) =>
-            apiRequest({ baseUrl: BASE_URL!, path: `/trips/${id}/complete` , method: 'POST' }),
-
-        archive: (id: string) =>
-            apiRequest({ baseUrl: BASE_URL!, path: `/trips/${id}/archive` , method: 'POST' }),
+        archive: (id: string, token: string) =>
+            apiRequest({ baseUrl: BASE_URL!, path: `/trips/${id}/archive` , method: 'POST', token }),
     },
     entries: {
         listByTrip: (tripId: string) =>
@@ -113,31 +113,34 @@ export const entriesApi = {
         getById: (id: string) =>
             apiRequest<Entry>({ baseUrl: BASE_URL!, path: `/entries/${id}` }),
 
-        create: (tripId: string, input: CreateEntryInput) =>
+        create: (tripId: string, input: CreateEntryInput, token: string) =>
             apiRequest<{ id: string }>({
                 baseUrl: BASE_URL!,
                 path: `/trips/${tripId}/entries`,
                 json: input,
+                token,
             }),
 
-        attachMedia: (entryId: string, mediaId: string) =>
+        attachMedia: (entryId: string, mediaId: string, token: string) =>
             apiRequest({
                 baseUrl: BASE_URL!,
                 path: `/entries/${entryId}/media/${mediaId}`,
-                method: 'POST'
+                method: 'POST',
+                token,
             }),
 
-        removeMedia: (entryId: string, mediaId: string) =>
+        removeMedia: (entryId: string, mediaId: string, token: string) =>
             apiRequest({
                 baseUrl: BASE_URL!,
                 path: `/entries/${entryId}/media/${mediaId}`,
-                method: 'DELETE'
+                method: 'DELETE',
+                token,
             }),
 
-        publish: (id: string) =>
-            apiRequest({ baseUrl: BASE_URL!, path: `/entries/${id}/publish` , method: 'POST' }),
+        publish: (id: string, token: string) =>
+            apiRequest({ baseUrl: BASE_URL!, path: `/entries/${id}/publish` , method: 'POST', token }),
 
-        archive: (id: string) =>
-            apiRequest({ baseUrl: BASE_URL!, path: `/entries/${id}/archive` , method: 'POST' }),
+        archive: (id: string, token: string) =>
+            apiRequest({ baseUrl: BASE_URL!, path: `/entries/${id}/archive` , method: 'POST', token }),
     },
 };

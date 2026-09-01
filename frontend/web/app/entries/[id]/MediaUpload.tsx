@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { useUpload } from '@/lib/use-upload';
 
 export function MediaUpload({ entryId }: { entryId: string }) {
@@ -9,12 +10,21 @@ export function MediaUpload({ entryId }: { entryId: string }) {
     const inputRef = useRef<HTMLInputElement>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const { state, progress, error, upload, reset, uploading } = useUpload();
+    const { data: session } = useSession();
 
     async function handleUpload() {
         if (!selectedFile) return;
+        if (!session?.apiToken) {
+            return (
+                <div className="rounded border bg-neutral-50 p-4 text-sm text-neutral-600">
+                    Sign in to upload media.
+                </div>
+            );
+            //return;
+        }
 
         try {
-            await upload(selectedFile, entryId);
+            await upload(selectedFile, entryId, session.apiToken);
             // Refresh the Server Component so the new media appears in the list
             router.refresh();
             setSelectedFile(null);

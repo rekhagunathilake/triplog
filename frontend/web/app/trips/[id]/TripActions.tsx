@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
+import { useSession } from 'next-auth/react';
 import { entriesApi, type TripStatus } from '@/lib/entries-api';
 import { ApiError } from '@/lib/api-error';
 
@@ -17,14 +18,20 @@ export function TripActions({
     const router = useRouter();
     const [pending, startTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);
+    const { data: session } = useSession();
 
     async function runAction(action: Action) {
+        if (!session?.apiToken) {
+            setError('You must be signed in to perform this action.');
+            return;
+        }
+
         setError(null);
 
         try {
-            if (action === 'activate') await entriesApi.trips.activate(tripId);
-            else if (action === 'complete') await entriesApi.trips.complete(tripId);
-            else if (action === 'archive') await entriesApi.trips.archive(tripId);
+            if (action === 'activate') await entriesApi.trips.activate(tripId, session.apiToken);
+            else if (action === 'complete') await entriesApi.trips.complete(tripId, session.apiToken);
+            else if (action === 'archive') await entriesApi.trips.archive(tripId, session.apiToken);
 
             // Refresh the Server Component tree so the new status renders
             startTransition(() => {

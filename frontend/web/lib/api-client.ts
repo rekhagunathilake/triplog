@@ -1,15 +1,14 @@
 import { ApiError } from './api-error';
 
-const DEV_USER_ID = process.env.NEXT_PUBLIC_DEV_USER_ID!;
-
 interface ApiRequestOptions extends RequestInit {
   baseUrl: string;
   path: string;
   json?: unknown;
+  token?: string;
 }
 
 export async function apiRequest<T = void>(options: ApiRequestOptions): Promise<T> {
-  const { baseUrl, path, json, headers, method, ...rest } = options;
+  const { baseUrl, path, json, headers, method, token, ...rest } = options;
 
   const response = await fetch(`${baseUrl}${path}`, {
     method: method || (json ? 'POST' : 'GET'),
