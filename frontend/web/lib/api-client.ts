@@ -13,7 +13,7 @@ export async function apiRequest<T = void>(options: ApiRequestOptions): Promise<
   const response = await fetch(`${baseUrl}${path}`, {
     method: method || (json ? 'POST' : 'GET'),
     headers: {
-      'X-User-Id': DEV_USER_ID,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(json ? { 'Content-Type': 'application/json' } : {}),
       ...headers,
     },
