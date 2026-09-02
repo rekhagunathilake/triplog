@@ -24,7 +24,7 @@ export function MediaUpload({ entryId }: { entryId: string }) {
         }
 
         try {
-            await upload(selectedFile, entryId, session.apiToken);
+            await upload(selectedFile, entryId);
             // Refresh the Server Component so the new media appears in the list
             router.refresh();
             setSelectedFile(null);

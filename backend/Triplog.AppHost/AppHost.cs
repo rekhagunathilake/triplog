@@ -18,7 +18,8 @@ var minio = builder.AddContainer("minio", "minio/minio")
     .WithEndpoint(9001, 9001, name: "console", scheme: "http")
     .WithArgs("server", "/data", "--console-address", ":9001")
     .WithEnvironment("MINIO_ROOT_USER", "minioadmin")
-    .WithEnvironment("MINIO_ROOT_PASSWORD", "minioadmin");
+    .WithEnvironment("MINIO_ROOT_PASSWORD", "minioadmin")
+    .WithVolume("triplog-minio-data", "/data");
 
 var minioApi = minio.GetEndpoint("api");
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { auth } from '@/auth';
 import { notFound } from "next/navigation";
 import { entriesApi, type EntrySummary } from "@/lib/entries-api";
 import { ApiError } from "@/lib/api-error";
@@ -11,6 +12,7 @@ export default async function TripPage({
     params: Promise<{ id: string }>;
 }) {
     const { id } = await params;
+    const session = await auth();
 
     let trip;
     let entries: EntrySummary[];
@@ -50,12 +52,14 @@ export default async function TripPage({
             <section>
                 <div className="mb-3 flex items-center justify-between">
                     <h2 className="text-lg font-medium">Entries</h2>
-                    <Link
-                        href={`/trips/${trip.id}/entries/new`}
-                        className="text-sm text-blue-600 hover:underline"
-                    >
-                        New Entry
-                    </Link>
+                    {session && (
+                        <Link
+                            href={`/trips/${trip.id}/entries/new`}
+                            className="text-sm text-blue-600 hover:underline"
+                        >
+                            New Entry
+                        </Link>
+                    )}
                 </div>
 
                 {entries.length === 0 ? (
