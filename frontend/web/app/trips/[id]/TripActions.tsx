@@ -55,17 +55,17 @@ const canArchive = status !== 'Archived';
 return (
     <div className="space-y-3">
         <div className="flex gap-2">
-            {canActivate && (
+            {canActivate && session && (
                 <ActionButton onClick={() => runAction('activate')} disabled={pending}>
                     Activate
                 </ActionButton>
             )}
-            {canComplete && (
+            {canComplete && session && (
                 <ActionButton onClick={() => runAction('complete')} disabled={pending}>
                     Complete
                 </ActionButton>
             )}
-            {canArchive && (
+            {canArchive && session && (
                 <ActionButton onClick={() => runAction('archive')} disabled={pending}>
                     Archive
                 </ActionButton>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { mediaApi } from './media-api';
 import { entriesApi } from './entries-api';
 import { ApiError } from './api-error';
@@ -11,8 +12,14 @@ export function useUpload() {
     const [state, setState] = useState<UploadState>('idle');
     const [progress, setProgress] = useState(0);
     const [error, setError] = useState<string | null>(null);
+    const { data: session } = useSession();
 
     async function upload(file:File, entryId: string) {
+        if (!session?.apiToken) {
+            setError('You must be signed in to create an entry.');
+            return;
+        }
+
         setState('requesting');
         setProgress(0);
         setError(null);
@@ -23,7 +30,7 @@ export function useUpload() {
                 contentType: file.type,
                 sizeInBytes: file.size,
                 originalFileName: file.name,
-            });
+            }, session.apiToken);
 
             // Step 2: PUT directly to MinIO with progress
             setState('uploading');
@@ -31,7 +38,7 @@ export function useUpload() {
 
             // Step 3: tell entries-api to attach this media
             setState('attaching');
-            await entriesApi.entries.attachMedia(entryId, mediaId);
+            await entriesApi.entries.attachMedia(entryId, mediaId, session.apiToken);
 
             setState('done');
             return { mediaId };

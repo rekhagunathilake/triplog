@@ -63,12 +63,12 @@ export function EntryActions({
     return (
         <div className="space-y-3">
             <div className="flex gap-2">
-                {canPublish && (
+                {canPublish && session && (
                     <ActionButton onClick={() => runAction('publish')} disabled={!canPublish}>
                         Publish
                     </ActionButton>
                 )}
-                {canArchive && (
+                {canArchive && session && (
                     <ActionButton onClick={() => runAction('archive')} disabled={!canArchive}>
                         Archive
                     </ActionButton>
