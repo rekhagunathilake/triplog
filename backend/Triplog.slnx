@@ -18,6 +18,7 @@
     <File Path="ADR-010-design-time-dbcontext-factory.md" />
     <File Path="ADR-011-in-memory-domain-event-dispatch.md" />
     <File Path="ADR-012-saga-design.md" />
+    <File Path="ADR-013-google-oauth-single-owner.md" />
   </Folder>
   <Folder Name="/docs/screenshots/">
     <File Path="aspire-dashboard.png" />
@@ -44,8 +45,8 @@
     <File Path="compose.local.yml" />
   </Folder>
   <Folder Name="/Tests/">
-    <Project Path="tests/Triplog.IntegrationTests/Triplog.IntegrationTests.csproj" />
     <Project Path="tests/Triplog.Entries.Domain.UnitTests/Triplog.Entries.Domain.UnitTests.csproj" />
+    <Project Path="tests/Triplog.IntegrationTests/Triplog.IntegrationTests.csproj" />
     <Project Path="tests/Triplog.Media.Domain.UnitTests/Triplog.Media.Domain.UnitTests.csproj" />
   </Folder>
   <Project Path="Triplog.AppHost/Triplog.AppHost.csproj" />
