@@ -2,6 +2,7 @@
 
 ## Status
 Accepted — 2026-06-21
+Superseded by [ADR-013](ADR-013-google-oauth-single-owner.md) — 2026-09-04
 
 ## Context
 A production travel journal needs authentication. The implementation choices (OIDC, session cookies, JWT, social login, magic links)
