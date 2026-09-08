@@ -41,6 +41,21 @@ The full auth flow — sign-in through backend token verification — is diagram
 - **Server-only proxy pattern.** All backend calls go through Next.js server routes; backend accepts requests only from the proxy via a shared internal API key. Simpler backend auth, but couples the deployment (backend cannot serve directly) and forfeits an interview-visible JWT flow.
 - **Password + JWT.** Classic full-stack auth demo. Adds password storage, hashing, sign-in endpoint, forgot-password UX — more code, no more portfolio signal than OAuth.
 
+## Non-goals
+
+This auth model **does** defend against:
+- Random visitors writing to the journal
+- Someone forging a token without knowing `AUTH_SECRET`
+- Cookie theft leading to write access from a different browser (session cookie is HttpOnly + SameSite)
+
+This auth model **does not** defend against:
+- `AUTH_SECRET` leaking — anyone with the secret can forge a valid owner token
+- Compromise of owner's (my) Google account — email match is the only ownership check
+- Rate limits, brute force, abuse — no throttling in v1
+- Confused-deputy attacks on the saga-called internal endpoints (`/publish/complete`, `/finalize`) — these accept unauthenticated calls because MassTransit calls them in-process. Deploy needs network isolation to protect these.
+
+Deploy hardening (rate limits, WAF, IP allowlist for internal endpoints) is out of scope for v1.
+
 ## v3 plan
 For a hypothetical multi-writer version:
 - Domain layer needs no changes — `OwnerId` is already strongly-typed
