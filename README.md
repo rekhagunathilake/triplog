@@ -294,7 +294,7 @@ triplog/
 
 ## Explicitly out of scope for v1
 
-- Real authentication or authorisation
+- Rate limits, WAF, and abuse prevention (see [ADR-013 non-goals](backend/ADR-013-google-oauth-single-owner.md#non-goals))
 - Cloud deployment (AWS / Azure / GCP)
 - Production-grade observability (Grafana, alerting, SLOs)
 - Mobile or offline support
