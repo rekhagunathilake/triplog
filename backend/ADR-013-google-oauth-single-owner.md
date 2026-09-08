@@ -17,6 +17,9 @@ At the same time, triplog is a solo-owner portfolio project — Rekha's travel j
 - **Shared HS256 secret.** `Auth:JwtSecret` (backend) and `AUTH_SECRET` (frontend) hold the same value. Symmetric because signer and verifier are the same party.
 - **Backend never talks to Google.** Google is involved only in the OAuth handshake between browser and frontend. The backend has no OIDC discovery, no dependency on Google being reachable — just a shared secret it uses to verify tokens.
 
+## Sequence
+The full auth flow — sign-in through backend token verification — is diagrammed in the [Authentication](../README.md#authentication) section of the README.
+
 ## Consequences
 
 **Positive:**
