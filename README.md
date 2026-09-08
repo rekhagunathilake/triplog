@@ -100,6 +100,41 @@ A saga only earns its complexity when there's a real failure mode to compensate 
 | 4 | entries-api | On `MediaFinalized` → `Entry` → `Published` | Revert `Entry` → `Draft` |
 | 5 | media-api | Failure → `MediaFinalizationFailed` → saga compensates | — |
 
+## Authentication
+
+Reads are public. Writes require the site owner to sign in via Google.
+
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant NA as NextAuth (Next.js)
+    participant G as Google OAuth
+    participant EA as entries-api
+    participant MA as media-api
+
+    B->>NA: Click "Sign in"
+    NA->>G: Redirect to Google consent
+    G-->>B: User approves
+    B->>NA: Callback with auth code
+    NA->>G: Exchange code for profile
+    G-->>NA: id_token + profile
+    NA->>NA: signIn callback: email must match OwnerEmail
+    NA->>NA: jwt callback: sign HS256 API token with AUTH_SECRET
+    NA-->>B: Session cookie (JWE) + session.apiToken (JWS)
+
+    Note over B,MA: Reads (no auth)
+    B->>EA: GET /trips
+    EA-->>B: 200 OK
+
+    Note over B,MA: Writes (Bearer JWT)
+    B->>EA: POST /trips + Authorization: Bearer <jwt>
+    EA->>EA: Verify HS256 signature with Auth:JwtSecret
+    EA->>EA: OwnerPolicy: email claim == Auth:OwnerEmail
+    EA-->>B: 201 Created
+```
+
+Owner check happens twice — once at Google callback (block anyone but the configured email), once at each backend write (verify the JWT's email claim matches config). Anonymous visitors see the read-only view and never see write UI. See [ADR-013](backend/ADR-013-google-oauth-single-owner.md) for the full rationale.
+
 ## Why microservices for a travel journal?
 
 This domain does not require microservices. Splitting it is the *point*.
@@ -113,7 +148,7 @@ The split itself isn't arbitrary either: **entries** is small, relational, trans
 1. **Monorepo, single solution** — both services in one `.slnx` so the shared `Triplog.Contracts` project is referenceable without NuGet plumbing. Honest for portfolio scope; in production each service would publish contracts as a versioned package.
 2. **Each service owns its database schema** — two named databases (`entries`, `media`) on one Aspire-managed Postgres server in local dev. Keeps the boundary truthful (no cross-schema joins) without spinning two Postgres containers.
 3. **Saga lives in entries-api (orchestration, not choreography)** — `Entry` owns the publish state machine, so it's the natural orchestrator. Choreography would scatter state across services and obscure the failure-recovery story.
-4. **Google OAuth + owner-only writes** — single-owner model. Anonymous visitors have full read access; only the configured owner email (via Google sign-in) can create, edit, or publish. Backend enforces via JWT bearer + policy; frontend gates UI. See [ADR-013](backend/ADR-013-google-oauth-single-owner.md).
+4. **No authentication** — explicitly out of scope. Requests carry a fake `X-User-Id` header. Auth would add infrastructure noise that distracts from the distributed-system patterns this project is meant to show.
 5. **Time injection in the Domain layer** — all state-changing methods accept `DateTime nowUtc`, so tests are fully deterministic and there's no hidden `DateTime.UtcNow` call inside aggregates. See [ADR-007](backend/ADR-007-time-injection.md).
 6. **`Result<T>` for expected failures** — the API layer maps error codes to HTTP status (`.NotFound` → 404, state conflicts → 409, everything else → 400). Validation failures use FluentValidation and are the one exception path — see [ADR-008](backend/ADR-008-result-pattern.md) and [ADR-009](backend/ADR-009-validation-throws-instead-of-result.md).
 
@@ -259,7 +294,7 @@ triplog/
 
 ## Explicitly out of scope for v1
 
-- Real authentication or authorisation
+- Rate limits, WAF, and abuse prevention (see [ADR-013 non-goals](backend/ADR-013-google-oauth-single-owner.md#non-goals))
 - Cloud deployment (AWS / Azure / GCP)
 - Production-grade observability (Grafana, alerting, SLOs)
 - Mobile or offline support
